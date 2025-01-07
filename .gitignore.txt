@@ -1,0 +1,3 @@
+.vs/
+*.opendb
+Browse.VC.db
