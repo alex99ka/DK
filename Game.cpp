@@ -244,9 +244,9 @@ bool CGame:: ValidateChars()
 
 	return true;
 }
-
+// need to be changes
 void CGame::DecipherScreen()
-{
+{ 
 	m_ghosts.clear();  // Clear any existing ghosts
 
 	// Iterate through ghost positions stored in m_data
