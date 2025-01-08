@@ -47,6 +47,7 @@ private:
 	void PrintChooseLevel();
 	bool OpenFile();
 	bool ValidateChars();
+	void DecipherScreen();
 
 	void PrintMenu();
 	MenuDecision GetMenuDecision();
@@ -59,6 +60,7 @@ private:
 	void CharacterDeathAnimation(CMovingItem& character);
 	void DrawHearts();
 	void CreatePrincess();
+	void FreeScreenData();
 	
 	CGame::LiveStatus AddBarrel();
 	LiveStatus BarrelMoving(CMovingItem& barrel);
@@ -78,6 +80,7 @@ private:
 	string m_FileNames[AMOUNT_OF_FILES] = { "dkong_a.screen","dkong_b.screen" ,"dkong_c.screen" ,"dkong_d.screen" };
 	string m_FileName = " "; // player must choose a screen from the options
 	vector<string> m_screen = {}; // default empty
+	vector<CMovingItem> m_ghosts;  // ghost vector
 	bool m_DonkeyIsDead = false;
 	int m_nBarrels = MAX_NUM_BARRELS;
 	bool m_IsColored = true;
@@ -85,8 +88,11 @@ private:
 	CMovingItem m_mario;
 	CItem m_donkeykong;
 	CItem m_princess;
-	std::vector<CMovingItem> m_barrels;
+	vector<CMovingItem> m_barrels;
 	CBoard m_board;
+	ScreenData m_data;
+	CPoint m_Legend;
+	CItem m_hammer;
 };
 
 

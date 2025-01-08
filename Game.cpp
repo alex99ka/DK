@@ -59,6 +59,7 @@ CGame::MenuDecision CGame::GetMenuDecision()
 		 switch (choice)
 		 {
 		 case '1':
+			 // check that the player has choosen a level and only then allow them to start
 			 return  CGame::GAME_START;
 		 case '2':
 			 m_IsColored = !m_IsColored;// toggle 
@@ -142,11 +143,11 @@ void CGame::StartGame()
 
 void CGame::Init()
 {
-	// board should recive the screen and also there need to be a function that also goes through screen and looks for ghosts and other objects 
+	// in this line m_board.init recives m_data and also a function that fills all the relevant data about the ghosts and hammer 
+	DecipherScreen();
 	m_board.Init(m_IsColored);
-	m_mario = CMovingItem(2, m_board.GetBorderHight() - 2, AVATAR_MARIO, m_IsColored ? CColorPoint::c_color::GREEN : CColorPoint::c_color::WHITE); // reset mario to the bottom 
+	FreeScreenData();
 	m_mario.SetLives(MARIO_LIVES);
-	m_donkeykong = CItem(m_board.GetBorderWidth() / 2, 2, AVATAR_DONKEYKONG, m_IsColored ? CColorPoint::c_color::CYAN : CColorPoint::c_color::WHITE);
 	m_DonkeyIsDead = false;
 	m_nBarrels = MAX_NUM_BARRELS;
 	m_barrels.clear();
@@ -165,24 +166,22 @@ void CGame::ChooseLevel()
 		if (_kbhit())
 		{
 			input = _getch();
+			switch (input)
 			{
-				switch (input)
-				{
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-					m_FileName = m_FileNames[input - '0'];
-					break;
-				default:
-					cout << "your choice is not legal input" << endl;
-				}
-				if (OpenFile())
-				{
-					clrscr();
-					PrintMenu();
-					return;
-				}
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+				m_FileName = m_FileNames[input - '0'];
+				break;
+			default:
+				cout << "your choice is not legal input" << endl;
+			}
+			if (OpenFile())
+			{
+				clrscr();
+				PrintMenu();
+				return;
 			}
 		}
 	}
@@ -201,6 +200,7 @@ void CGame::PrintChooseLevel()
 bool CGame::OpenFile()
 {
 	CFile fileManager;
+	
 
 	if (!fileManager.OpenFile(m_FileName, m_screen)) {
 		cerr << "Failed to load file: " << fileManager.GetLastError() << endl;
@@ -211,7 +211,7 @@ bool CGame::OpenFile()
 		cerr << "Screen data is invalid: " << fileManager.GetLastError() << endl;
 		return false;
 	}
-	if (!ValidateChars())
+	if (!fileManager.ParseScreenData(m_screen,m_data ))
 	{
 		cerr << "The file: " << m_FileName << "contains an illegal char inside, make sure it's correct" << endl;
 		return false;
@@ -230,7 +230,7 @@ bool CGame:: ValidateChars()
 		BOARDER_SYMB, FLOOR_SYMB, MOVE_RIGHT_SYMB, MOVE_LEFT_SYMB,
 		LADDER_SYMB, SPACE_SYMB, AVATAR_MARIO, AVATAR_BARREL,
 		AVATAR_DONKEYKONG, AVATAR_PRINCESS, AVATAR_GHOST,
-		LEGENS_SYMB, HAMMER_SYMB
+		LEGENS_SYMB, HAMMER_SYMB, ' '
 	};
 
 	for (const string& line : m_screen) 
@@ -243,6 +243,27 @@ bool CGame:: ValidateChars()
 	}
 
 	return true;
+}
+
+void CGame::DecipherScreen()
+{
+	m_ghosts.clear();  // Clear any existing ghosts
+
+	// Iterate through ghost positions stored in m_data
+	for (const auto& ghostPos : m_data.ghosts)
+	{
+		// Create a CMovingItem for each ghost
+		CMovingItem ghost(ghostPos.GetX(), ghostPos.GetY(),                       
+			AVATAR_GHOST, m_IsColored?                       // ghost symbol ('x')
+			CColorPoint::BLUE : CColorPoint::c_color::WHITE);
+		ghost.SetDirection(CMovingItem::RIGHT);  // arbitrary initial direction
+		m_ghosts.push_back(ghost);
+	}
+	m_Legend = m_data.Legend;
+	m_hammer = CItem(m_data.hammer.GetX(), m_data.hammer.GetY(), HAMMER_SYMB,m_IsColored? CColorPoint::MAGENTA : CColorPoint::c_color::WHITE);
+	m_mario = CMovingItem(m_data.mario.GetX(), m_data.mario.GetY(), AVATAR_MARIO, m_IsColored ? CColorPoint::c_color::GREEN : CColorPoint::c_color::WHITE); 
+	m_donkeykong = CItem(m_data.donkeyKong.GetX(), m_data.donkeyKong.GetY(), m_IsColored ? CColorPoint::c_color::CYAN : CColorPoint::c_color::WHITE);
+	m_princess = CItem(m_data.pauline.GetX(), m_data.pauline.GetY(), m_IsColored ? CColorPoint::c_color::MAGENTA : CColorPoint::c_color::WHITE);
 }
 
 // called upon after a death, returns mario to spawn point
@@ -903,6 +924,16 @@ void CGame::CreatePrincess()
 		CColoredPrint::pr(FLOOR_SYMB, m_IsColored ? CColorPoint::c_color::YELLOW : CColorPoint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
 	}
 	m_princess.Draw();
+}
+void CGame::FreeScreenData()
+{
+	m_data.barrels.clear();
+	m_data.ghosts.clear();
+	m_data.ladders.clear();
+	m_data.walls.clear();
+	m_data.floor.clear();
+	m_data.Left.clear();
+	m_data.Right.clear();
 }
 // animation inspired by old games for when mario dies
 void CGame::CharacterDeathAnimation(CMovingItem& character)

@@ -46,17 +46,18 @@ bool CFile::ParseScreenData(const vector<string>& screen, ScreenData& data) {
             pair<int, int> position = { i, j };
 
             switch (symbol) {
-            case '@': data.mario.push_back(position); break;
-            case '$': data.pauline.push_back(position); break;
-            case '&': data.donkeyKong.push_back(position); break;
-            case 'O': data.barrels.push_back(position); break;
-            case 'H': data.ladders.push_back(position); break;
-            case 'x': data.ghosts.push_back(position); break;
-            case 'p': data.hammers.push_back(position); break;
-            case 'Q': data.walls.push_back(position); break;
-            case '=':data.floors.push_back(position); break;
-            case '<':data.floors.push_back(position); break;
-            case '>': data.floors.push_back(position); break;
+            case '@': data.mario = CPoint(position.first, position.second); break;
+            case 'p': data.hammer = CPoint(position.first, position.second); break;
+            case '$': data.pauline = CPoint(position.first, position.second); break;
+            case '&': data.donkeyKong = CPoint(position.first, position.second); break;
+            case 'x': data.ghosts.push_back(CPoint(position.first, position.second)); break;
+            case 'O': data.barrels.push_back(CPoint(position.first, position.second)); break;
+            case 'H': data.ladders.push_back(CPoint(position.first, position.second)); break;
+            case 'Q': data.walls.push_back(CPoint(position.first, position.second)); break;
+            case '=':data.floor.push_back(CPoint(position.first, position.second)); break;
+            case '<':data.Left.push_back(CPoint(position.first, position.second)); break;
+            case '>': data.Right.push_back(CPoint(position.first, position.second)); break;
+            case 'L': data.Legend = CPoint(position.first, position.second); break;
             default:
                 if (symbol != ' ') { // Ignore spaces
                     lastError = "Unknown symbol '" + string(1, symbol) +
@@ -66,6 +67,5 @@ bool CFile::ParseScreenData(const vector<string>& screen, ScreenData& data) {
             }
         }
     }
-
     return true;
 }

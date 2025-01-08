@@ -1,0 +1,8 @@
+*.user
+.vs/
+*.vsidx
+Debug/
+Release/
+x64/
+*.user
+Project1/.vs/

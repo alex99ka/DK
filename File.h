@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include "Item.h"
 
 using namespace std;
 
@@ -16,15 +17,18 @@ using namespace std;
 //
 // This struct makes it easy to find where each game symbol is on the screen.
 struct ScreenData {
-    vector<pair<int, int>> mario;        // '@'
-    vector<pair<int, int>> pauline;     // '$'
-    vector<pair<int, int>> donkeyKong;  // '&'
-    vector<pair<int, int>> barrels;     // 'O'
-    vector<pair<int, int>> ladders;     // 'H'
-    vector<pair<int, int>> ghosts;      // 'x'
-    vector<pair<int, int>> hammers;     // 'p'
-    vector<pair<int, int>> walls;       // 'Q'
-    vector<pair<int, int>> floors;      // '=', '<', '>'
+    CPoint mario;        // '@'
+    CPoint pauline;     // '$'
+    CPoint donkeyKong;  // '&'
+    CPoint Legend; //'L'
+    CPoint hammer;     // 'p'
+    vector<CPoint> barrels;     // 'O'
+    vector<CPoint> ghosts;      // 'x'
+    vector<CPoint > ladders;     // 'H'
+    vector<CPoint> walls;       // 'Q'
+    vector<CPoint> floor;      // '='
+    vector<CPoint> Left;      // '<'
+    vector<CPoint> Right;      //  '>'
 };
 
 class CFile {
