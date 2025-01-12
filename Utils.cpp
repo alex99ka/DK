@@ -1,5 +1,4 @@
 
-#include <random>
 #include "utils.h"
 
 void GoToXY(int x, int y) {

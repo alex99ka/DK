@@ -1,7 +1,9 @@
 #pragma once
-#include<iostream>
 #include "Item.h"
+#include<iostream>
 
+static constexpr int BORDER_HIGHT = 25;
+static constexpr int BORDER_WIDTH = 80;
 // a node that states when to start and end a gap on the platform
 typedef struct SPACES {
 	int begining;
@@ -35,8 +37,6 @@ typedef struct ListOfLadders
 
 class CBoard
 {
-	static constexpr int BORDER_WIDTH = 80;
-	static constexpr int BORDER_HIGHT = 24;
 	static constexpr int SIZE_LEVEL_STOCK = 7;
 	static constexpr int UNUSED_LEVEL = -1;
 	static constexpr char BOARDER_SYMB = 'Q';

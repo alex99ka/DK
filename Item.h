@@ -1,6 +1,6 @@
 #pragma once
-#include "ColorPoint.h"
 #include "Utils.h"
+#include "ColorPoint.h"
 
 class CPoint
 {
@@ -71,33 +71,8 @@ public:
 	enum Directions GetPrevDirection() { return m_prevDirection; };
 	bool IsStop() { return (m_direction == STOP); }
 	void SetPrevDirection(Directions direction) { m_prevDirection = direction; }
-	void SetDirection(Directions direction) {
-		if (m_FallCounter > 0) // we don't change direction during falling the character
-			return;
-		m_direction = direction;
-		switch (direction)
-		{
-		case STOP:
-			m_Xdirection = 0;
-			m_Ydirection = 0;
-			break;
-		case RIGHT:
-			m_Xdirection = 1;
-			m_Ydirection = 0;
-			break;
-		case LEFT:
-			m_Xdirection = -1;
-			m_Ydirection = 0;
-			break;
-		case UP:
-			m_Ydirection = -2;
-			break;
-		case DOWN:
-			m_Xdirection = 0;
-			m_Ydirection = 1;
-			break;
-		}
-	}
+	void SetDirection(Directions direction);
+	
 	void ReduceLife() { m_lives--; }
 	int GetLives() { return m_lives; }
 	void SetLives(int lives) { m_lives = lives; }

@@ -1,9 +1,17 @@
 #pragma once
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#include <vector>
+#include <filesystem>
+#include <fstream>
+#include <regex>
 #include "Board.h"
 #include "Item.h"
 #include "string.h"
 #include "File.h"
-#include <vector>
+namespace fs = std::filesystem;
+
 
 class CGame
 {
@@ -18,6 +26,8 @@ private:
 	static constexpr int ESC_KEY = 27;
 	static constexpr int MARIO_LIVES = 3;
 	static constexpr int AMOUNT_OF_FILES = 4;
+	static constexpr int PAGE_RIGHT = -1;
+	static constexpr int PAGE_LEFT = -2;
 	static constexpr char AVATAR_MARIO = '@';
 	static constexpr char AVATAR_BARREL = 'O';
 	static constexpr char AVATAR_DONKEYKONG = '&';
@@ -38,19 +48,21 @@ private:
 	static constexpr int BARREL_FREQUENCY_BIRTH = 25;
 	static constexpr int MAX_FALL_BARREL = 8;
 
-	void StartGame();
-	void Init();
+	void StartGame(char board[][BORDER_WIDTH]);
+	void Init(char board[][BORDER_WIDTH]);
 	void PlayLoop();
 	MenuDecision Paused();
 	void ResetScreen();
-	void ChooseLevel();
-	void PrintChooseLevel();
-	bool OpenFile();
+	void ChooseLevel(char board[][BORDER_WIDTH]);
+	void PrintChooseLevel(vector<string> FileNames, int instance, int len, int Amount_of_Files_on_screen);
+	bool OpenFile(CFile& fileManager, char board[][BORDER_WIDTH]);
+	int LegalButton(char input, int instance, int len, int Amount_of_Files_on_screen);
 	bool ValidateChars();
-	void DecipherScreen();
+	bool DecipherScreen(char board[][BORDER_WIDTH]);
+	vector<string> ReadDirectory();
 
 	void PrintMenu();
-	MenuDecision GetMenuDecision();
+	MenuDecision GetMenuDecision(char board[][BORDER_WIDTH]);
 	void PrintInstructions(ScreenType type);
 	void PrintGoodbye();
 	void PrintCongratulation();
@@ -76,6 +88,7 @@ private:
 	void FallCharacter(CMovingItem& character);
 	void ResetPlayer();
 	void EraseCharacter(CMovingItem& character);
+	bool IsInBounds(int i, int j) const;
 
 	string m_FileNames[AMOUNT_OF_FILES] = { "dkong_a.screen","dkong_b.screen" ,"dkong_c.screen" ,"dkong_d.screen" };
 	string m_FileName = " "; // player must choose a screen from the options

@@ -105,6 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,6 +136,7 @@
     <ClCompile Include="..\Board.cpp" />
     <ClCompile Include="..\File.cpp" />
     <ClCompile Include="..\Game.cpp" />
+    <ClCompile Include="..\Item.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\Utils.cpp" />
   </ItemGroup>

@@ -37,31 +37,32 @@ string CFile::GetLastError() const {
     return lastError;
 }
 
-bool CFile::ParseScreenData(const vector<string>& screen, ScreenData& data) {
-    data = {};
+bool CFile::ParseScreenData(vector<string>& screen, ScreenData& data) 
+{
+    data = {};  // Initialize the ScreenData structure
 
     for (int i = 0; i < screen.size(); ++i) {
         for (int j = 0; j < screen[i].size(); ++j) {
             char symbol = screen[i][j];
-            pair<int, int> position = { i, j };
 
             switch (symbol) {
-            case '@': data.mario = CPoint(position.first, position.second); break;
-            case 'p': data.hammer = CPoint(position.first, position.second); break;
-            case '$': data.pauline = CPoint(position.first, position.second); break;
-            case '&': data.donkeyKong = CPoint(position.first, position.second); break;
-            case 'x': data.ghosts.push_back(CPoint(position.first, position.second)); break;
-            case 'O': data.barrels.push_back(CPoint(position.first, position.second)); break;
-            case 'H': data.ladders.push_back(CPoint(position.first, position.second)); break;
-            case 'Q': data.walls.push_back(CPoint(position.first, position.second)); break;
-            case '=':data.floor.push_back(CPoint(position.first, position.second)); break;
-            case '<':data.Left.push_back(CPoint(position.first, position.second)); break;
-            case '>': data.Right.push_back(CPoint(position.first, position.second)); break;
-            case 'L': data.Legend = CPoint(position.first, position.second); break;
+            case '@': data.mario = CPoint(i, j); break;
+            case 'p': data.hammer = CPoint(i, j); break;
+            case '$': data.pauline = CPoint(i, j); break;
+            case '&': data.donkeyKong = CPoint(i, j); break;
+            case 'x': data.ghosts.push_back(CPoint(i, j)); break;
+            case 'O': data.barrels.push_back(CPoint(i, j)); break; // from below add to board. 
+            case 'H': data.ladders.push_back(CPoint(i, j)); break;
+            case 'Q': data.walls.push_back(CPoint(i, j)); break;
+            case '=': data.floor.push_back(CPoint(i, j)); break;
+            case '<': data.Left.push_back(CPoint(i, j)); break;
+            case '>': data.Right.push_back(CPoint(i, j)); break;
+            case 'L': data.Legend = CPoint(i, j); break;
             default:
                 if (symbol != ' ') { // Ignore spaces
                     lastError = "Unknown symbol '" + string(1, symbol) +
                         "' at (" + to_string(i) + ", " + to_string(j) + ")";
+                    screen.clear();
                     return false;
                 }
             }

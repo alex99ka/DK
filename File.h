@@ -37,7 +37,7 @@ public:
     bool ValidateLines(const vector<string>& screen);
     string GetLastError() const;
 
-    bool ParseScreenData(const vector<string>& screen, ScreenData& data);
+    bool ParseScreenData(vector<string>& screen, ScreenData& data);
 
 private:
     string lastError;

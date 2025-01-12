@@ -7,6 +7,7 @@
 #include "ColorPoint.h"
 #include "utils.h"
 #include "File.h"
+#include <cctype>
 #include "Game.h"
 #include <set>
 using namespace std;
@@ -15,16 +16,17 @@ using namespace std;
 
 void CGame::Start()
 {
+	char board[BORDER_HIGHT][BORDER_WIDTH] = {};
 	while (true) {
 		PrintMenu();
-		CGame::MenuDecision decision = GetMenuDecision();
+		CGame::MenuDecision decision = GetMenuDecision(board);
 		if (decision== GAME_END)
 		{
 			PrintGoodbye();
 			return;
 		}
 		clrscr();
-		StartGame();
+		StartGame(board);
 		PlayLoop();
 	}
 }
@@ -47,9 +49,10 @@ void CGame::PrintMenu()
 	CColoredPrint::prl("9 - exit", CColorPoint::c_color::GREEN, CColorPoint::c_decoration::ITALIC);
 }
 
-CGame::MenuDecision CGame::GetMenuDecision()
+CGame::MenuDecision CGame::GetMenuDecision(char board[][BORDER_WIDTH])
 {
 	char choice;
+
 
 	while (true)
 	{
@@ -59,14 +62,17 @@ CGame::MenuDecision CGame::GetMenuDecision()
 		 switch (choice)
 		 {
 		 case '1':
-			 // check that the player has choosen a level and only then allow them to start
-			 return  CGame::GAME_START;
+			 if (!board)
+				 return  CGame::GAME_START;
+			 else
+				 cerr<<"you need to choose working file"<<endl ;
+			 break;
 		 case '2':
 			 m_IsColored = !m_IsColored;// toggle 
 			 PrintMenu();
 			 break;
 		 case '3':
-			 ChooseLevel();
+			 ChooseLevel(board);
 			 break;
 		 case '8':
 			 PrintInstructions(MAIN_MENU);
@@ -135,17 +141,15 @@ void CGame::PrintGoodbye()
 	CColoredPrint::prl("Goodbye, friend!\n", CColoredPrint::c_color::CYAN);
 }
 
-void CGame::StartGame()
+void CGame::StartGame(char board[][BORDER_WIDTH])
 {
-	Init();
+	Init(board);
 	m_board.Draw();
 }
 
-void CGame::Init()
+void CGame::Init(char board[][BORDER_WIDTH])
 {
-	// in this line m_board.init recives m_data and also a function that fills all the relevant data about the ghosts and hammer 
-	DecipherScreen();
-	m_board.Init(m_IsColored);
+	m_board.Init(m_IsColored); // should get board.
 	FreeScreenData();
 	m_mario.SetLives(MARIO_LIVES);
 	m_DonkeyIsDead = false;
@@ -154,69 +158,100 @@ void CGame::Init()
 }
 
 
-void CGame::ChooseLevel()
+void CGame::ChooseLevel(char board[][BORDER_WIDTH])
 {
 	vector<string> screen;
+	CFile fileManager;
 	char input;
+	int instance = 0, Amount_of_Files_on_screen = 9;
+	int option;
+	vector<string> FileNames  = ReadDirectory();
+	int len = (int)FileNames.size();
+	int Pages = len / Amount_of_Files_on_screen;
 	clrscr();
-	PrintChooseLevel();
+
+	if(!FileNames.empty())
 
 	while (true)
 	{
+		PrintChooseLevel(FileNames, instance, len, Amount_of_Files_on_screen);
 		if (_kbhit())
 		{
 			input = _getch();
-			switch (input)
+			option = LegalButton(input,instance, len, Amount_of_Files_on_screen);
+			if (!option)
+				continue;
+			else 
 			{
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-				m_FileName = m_FileNames[input - '0'];
-				break;
-			default:
-				cout << "your choice is not legal input" << endl;
-			}
-			if (OpenFile())
-			{
-				clrscr();
-				PrintMenu();
-				return;
+				switch (input)
+				{
+				case PAGE_RIGHT: // right
+					(Pages >= instance + 1) ? instance++ : instance = 0;
+					break;
+				case PAGE_LEFT:
+					if (instance > 0)
+						instance--;
+					break;
+				default:
+					m_FileName = FileNames[instance - 1];
+					if (OpenFile(fileManager,board))
+						return;
+					break;
+				}
 			}
 		}
+
+	}
+}
+void CGame::PrintChooseLevel(vector<string> FileNames, int instance, int len, int Amount_of_Files_on_screen)
+{
+	int startIndex = instance * Amount_of_Files_on_screen;
+	int filesToShow = min(Amount_of_Files_on_screen, len - startIndex); //to prevent overflow
+
+	for (int i = 0; i < filesToShow; i++)
+	{
+		CColoredPrint::pr(FileNames[startIndex + i],
+			m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE,
+			CColoredPrint::c_decoration::BOLD);
 	}
 }
 
-void CGame::PrintChooseLevel()
-{
-	CColoredPrint::pr("for level 1 press 1", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
-	CColoredPrint::pr("for level 2 press 2", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
-	CColoredPrint::pr("for level 3 press 3", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
-	CColoredPrint::pr("for custom level from file press 4", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
-}
-
-
 // checks if the file is correct and of not prints to correct error
-bool CGame::OpenFile()
+bool CGame::OpenFile(CFile& fileManager, char board[][BORDER_WIDTH])
 {
-	CFile fileManager;
-	
-
 	if (!fileManager.OpenFile(m_FileName, m_screen)) {
 		cerr << "Failed to load file: " << fileManager.GetLastError() << endl;
 		return false;
 	}
-
-	if (!fileManager.ValidateLines(m_screen)) {
-		cerr << "Screen data is invalid: " << fileManager.GetLastError() << endl;
-		return false;
-	}
-	if (!fileManager.ParseScreenData(m_screen,m_data ))
+	if (!DecipherScreen(board))
 	{
 		cerr << "The file: " << m_FileName << "contains an illegal char inside, make sure it's correct" << endl;
 		return false;
 	}
 	return true;
+}
+
+int CGame::LegalButton(char input, int instance, int len, int Amount_of_Files_on_screen)
+{
+
+	int filesInCurrentInstance;
+	if (instance == len / Amount_of_Files_on_screen) 
+		filesInCurrentInstance = len % Amount_of_Files_on_screen;
+	else
+		filesInCurrentInstance = Amount_of_Files_on_screen;
+
+	if (isdigit(input))
+	{
+		int num = input - '0';
+		if (num > 0 && num <= filesInCurrentInstance)
+			return num;
+	}
+	if (input == '>')
+		return PAGE_RIGHT;
+	if (input == '<')
+		return PAGE_LEFT;
+
+	return 0;  // Invalid input
 }
 
 
@@ -245,25 +280,93 @@ bool CGame:: ValidateChars()
 	return true;
 }
 // need to be changes
-void CGame::DecipherScreen()
-{ 
-	m_ghosts.clear();  // Clear any existing ghosts
+bool CGame::DecipherScreen(char board[][BORDER_WIDTH])
+{
+	m_ghosts.clear();  // Clear existing ghosts
 
-	// Iterate through ghost positions stored in m_data
-	for (const auto& ghostPos : m_data.ghosts)
-	{
-		// Create a CMovingItem for each ghost
-		CMovingItem ghost(ghostPos.GetX(), ghostPos.GetY(),                       
-			AVATAR_GHOST, m_IsColored?                       // ghost symbol ('x')
-			CColorPoint::BLUE : CColorPoint::c_color::WHITE);
-		ghost.SetDirection(CMovingItem::RIGHT);  // arbitrary initial direction
-		m_ghosts.push_back(ghost);
+	// Parse screen with bounds checking
+	for (int i = 0; i < min(static_cast<int>(m_screen.size()), BORDER_HIGHT); ++i) {
+		for (int j = 0; j < min(static_cast<int>(m_screen[i].size()), BORDER_WIDTH); ++j) {
+			char symbol = m_screen[i][j];
+
+			if (!IsInBounds(i, j))
+				continue;
+
+			switch (symbol) {
+			case AVATAR_MARIO:
+				m_mario = CMovingItem(j, i, AVATAR_MARIO,
+					m_IsColored ? CColorPoint::GREEN : CColorPoint::WHITE);
+				break;
+
+			case HAMMER_SYMB:
+				m_hammer = CItem(j, i, HAMMER_SYMB,
+					m_IsColored ? CColorPoint::MAGENTA : CColorPoint::WHITE);
+				break;
+
+			case AVATAR_PRINCESS:
+				m_princess = CItem(j, i, AVATAR_PRINCESS,
+					m_IsColored ? CColorPoint::MAGENTA : CColorPoint::WHITE);
+				break;
+
+			case AVATAR_DONKEYKONG:
+				m_donkeykong = CItem(j, i, AVATAR_DONKEYKONG,
+					m_IsColored ? CColorPoint::CYAN : CColorPoint::WHITE);
+				break;
+
+			case AVATAR_GHOST:
+				m_ghosts.push_back(CMovingItem(j, i, AVATAR_GHOST,
+					m_IsColored ? CColorPoint::BLUE : CColorPoint::WHITE));
+				break;
+
+			case LEGENS_SYMB:
+				m_Legend = CPoint(j, i);
+				break;
+
+			case LADDER_SYMB:
+			case BOARDER_SYMB:
+			case FLOOR_SYMB:
+			case MOVE_LEFT_SYMB:
+			case MOVE_RIGHT_SYMB:
+				board[i][j] = symbol;
+				break;
+
+			case SPACE_SYMB:
+				board[i][j] = SPACE_SYMB;
+				break;
+
+			default:
+				return false; // Found an invalid symbol
+			}
+		}
 	}
-	m_Legend = m_data.Legend;
-	m_hammer = CItem(m_data.hammer.GetX(), m_data.hammer.GetY(), HAMMER_SYMB,m_IsColored? CColorPoint::MAGENTA : CColorPoint::c_color::WHITE);
-	m_mario = CMovingItem(m_data.mario.GetX(), m_data.mario.GetY(), AVATAR_MARIO, m_IsColored ? CColorPoint::c_color::GREEN : CColorPoint::c_color::WHITE); 
-	m_donkeykong = CItem(m_data.donkeyKong.GetX(), m_data.donkeyKong.GetY(), m_IsColored ? CColorPoint::c_color::CYAN : CColorPoint::c_color::WHITE);
-	m_princess = CItem(m_data.pauline.GetX(), m_data.pauline.GetY(), m_IsColored ? CColorPoint::c_color::MAGENTA : CColorPoint::c_color::WHITE);
+
+	// Set initial direction for ghosts
+	for (auto& ghost : m_ghosts) {
+		ghost.SetDirection(CMovingItem::RIGHT);
+	}
+
+	return true; // Everything was processed successfully
+}
+
+vector<string> CGame::ReadDirectory()
+{
+	vector<string> Names;
+	regex pattern("dkong_[a-zA-Z0-9]+\\.screen");  // Only letters and numbers between dkong_ and .screen
+
+	try {
+		for (const auto& entry : fs::directory_iterator(fs::current_path()))
+		{
+			string filenameStr = entry.path().filename().string();
+
+			// Check if filename matches our pattern
+			if (regex_match(filenameStr, pattern))
+				Names.push_back(filenameStr);
+		}
+	}
+	catch (const fs::filesystem_error& e) {
+		cerr << "Filesystem error: " << e.what() << endl;
+	}
+	return Names;
 }
 
 // called upon after a death, returns mario to spawn point
@@ -374,10 +477,6 @@ void CGame::ResetScreen()
 		barrel.Draw();
 	}
 }
-
-
-
-
 // triggerd by the esc button
 CGame::MenuDecision CGame::Paused()
 {
@@ -630,6 +729,12 @@ void CGame::EraseCharacter(CMovingItem& character)
 	m_board.GetBoardSymbol(character, &symbol, &color);
 	character.SetRestoreSymbol(symbol, color);
 	character.Erase();
+}
+
+bool CGame::IsInBounds(int i, int j) const
+{
+		return i >= 0 && i < BORDER_HIGHT &&
+			j >= 0 && j < BORDER_WIDTH;
 }
 
 CGame::NeighboorType CGame::WhoSomeoneNextToMe(CPoint& point)
