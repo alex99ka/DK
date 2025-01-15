@@ -54,50 +54,34 @@ class CBoard
 public:
 	enum Board_Place { BOARDER, FLOOR, LADDER, FREE, OUT_OB, ARROW_RIGHT, ARROW_LEFT };
 
-	void Init(bool isColored, char board[][BORDER_WIDTH]);
+	void Init(bool isColored, char board[][BORDER_WIDTH - 2]);
 	void SetColored(bool isColored) { m_IsColored = isColored; }
 	void Draw();
 	int GetBorderHight() { return BORDER_HIGHT; };
 	int GetBorderWidth() { return BORDER_WIDTH; };
 	enum Board_Place GetBoardPlace(CPoint& const point);
 	bool GetBoardSymbol(CPoint& coord, char* symbol, CColorPoint::c_color* color);
-	void UpdateWorkBoard(int x, int y, char symbol);
-	void operator=(const char board[][BORDER_WIDTH])
+	void UpdateworkBoard(int x, int y, char symbol);
+	void operator=(const char board[][BORDER_WIDTH - 2])
 	{
-		for (int i = 0; i < BORDER_HIGHT; i++)
+		for (int i = 1 , k = 0; i < BORDER_HIGHT - 1; k++, i++)
 		{
-			for (int j = 0; j < BORDER_WIDTH; j++)
+			for (int j = 1, l = 0; j < BORDER_WIDTH -1;  l++ ,j++)
 			{
-				workBoard[i][j] = board[i][j];
+				workBoard[i][j] = board[k][l];
+				PrintBoard[k][l] = board[k][l];
 			}
 		}
 
-		for (int i = 0; i < BORDER_HIGHT - 2; i++)
-		{
-			for (int j = 0; j < BORDER_WIDTH - 2; j++)
-			{
-				PrintBoard[i][j] = board[i][j];
-			}
-		}
+	
 	}
 private:
 	//void RestoreBoard
 	void DrawOneChar(char ch);
 	// creates an array that inicates for each floor where to create white spaces
-	int CreateNodeArray(Spaces** Arr, int size);
-	// creat single node
-	Spaces* CreateNode(int* Wathcer, int StartInd, int direction);
-	// free the whole array of lists
-	void FreeNodeArr(Spaces** Arr, int size);
-	void FreeList(Spaces* head);
 	bool ValidatePoint(CPoint& const point);
-
-	void AddArrow(int x, int y, char symb);
-
-	Ladder* CreateNodeLadder(int level, int index, int size, Ladder::LadderType type = Ladder::LadderType::Full);
-	int CreateListOfLadders(ListOfLadders* lst, int size);
-	void FreeListLadderNode(Ladder *node);
 	CColorPoint::c_color GetCharColor(char ch);
+
 	char workBoard[BORDER_HIGHT][BORDER_WIDTH] = {};
 	char PrintBoard[BORDER_HIGHT-2][BORDER_WIDTH-2] = {};
 	bool m_IsColored = true;

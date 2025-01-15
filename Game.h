@@ -47,22 +47,22 @@ private:
 	static constexpr int BARREL_FREQUENCY_BIRTH = 25;
 	static constexpr int MAX_FALL_BARREL = 8;
 
-	void StartGame(char board[][BORDER_WIDTH]);
-	void Init(char board[][BORDER_WIDTH]);
+	void StartGame(char board[][BORDER_WIDTH - 2]);
+	void Init(char board[][BORDER_WIDTH - 2]);
 	void PlayLoop();
 	MenuDecision Paused();
 	void ResetScreen();
-	void ChooseLevel(char board[][BORDER_WIDTH]);
+	void ChooseLevel(char board[][BORDER_WIDTH - 2]);
 	void PrintChooseLevel(vector<string> FileNames, int instance, int len, int Amount_of_Files_on_screen);
-	bool OpenFile(CFile& fileManager, char board[][BORDER_WIDTH]);
+	bool OpenFile(CFile& fileManager, char board[][BORDER_WIDTH - 2 ]);
 	int LegalButton(char input, int instance, int len, int Amount_of_Files_on_screen);
 	//bool ValidateChars();
-	bool DecipherScreen(char board[][BORDER_WIDTH]);
+	bool DecipherScreen(char board[][BORDER_WIDTH - 2]);
 	vector<string> ReadDirectory();
 	bool NecessaryItemExicst();
 
 	void PrintMenu();
-	MenuDecision GetMenuDecision(char board[][BORDER_WIDTH]);
+	MenuDecision GetMenuDecision(char board[][BORDER_WIDTH - 2]);
 	void PrintInstructions(ScreenType type);
 	void PrintGoodbye();
 	void PrintCongratulation();
@@ -72,15 +72,19 @@ private:
 	void CharacterDeathAnimation(CMovingItem& character);
 	void DrawHearts();
 	void CreatePrincess();
-	void FreeScreenData();
+	void DrawGhost();
 	
-	CGame::LiveStatus AddBarrel();
+	LiveStatus AddBarrel();
 	LiveStatus BarrelMoving(CMovingItem& barrel);
 	LiveStatus BarrelsMoving();
 	bool BarrelFlowCollision(CMovingItem& barrel, CMovingItem::Directions direction, CPoint& newPos);
 	void ResetBarrel(CMovingItem& barrel);
-	CGame::LiveStatus ExplosionBarrel(CMovingItem& barrel);
-	bool IsHitPlayer(CMovingItem& barrel);
+	LiveStatus ExplosionBarrel(CMovingItem& barrel);
+	bool IsHitPlayer(CPoint& barrel);
+	LiveStatus GhostsMoving();
+	LiveStatus GhostMoving(CMovingItem& ghost);
+	LiveStatus SwitchGhostDirection(CMovingItem& ghost);
+
 
 	LiveStatus PlayerCheckNextCell(CMovingItem& character);
 	CGame::LiveStatus MovePlayer(CMovingItem& character, CPoint& newPos);

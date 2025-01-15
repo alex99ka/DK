@@ -31,9 +31,9 @@ public:
 	CItem(int x = 0, int y = 0, char c = ' ', CColorPoint::c_color color = CColorPoint::c_color::WHITE)
 		: CPoint(x, y), m_symbol(c), m_color(color) { }
 
-	char GetSymbol() { return m_symbol; }
+	char GetSymbol() const { return m_symbol; }
 	void SetRestoreSymbol(char ch, CColorPoint::c_color color) { m_RestoreSymbol = ch; m_RestoreColor = color; }
-	CColorPoint::c_color GetColor() { return m_color; }
+	CColorPoint::c_color GetColor() const { return m_color; }
 	void SetColor(CColorPoint::c_color color) { m_color = m_color; }
 	
 	void Draw() { _draw(m_symbol, m_color); }
