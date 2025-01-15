@@ -2,85 +2,21 @@
 #include "Board.h"
 #include "ColorPoint.h"
 
-void CBoard::Init(bool isColored)
+void CBoard::Init(bool isColored, char board[][BORDER_WIDTH])
 {
-	Spaces* ArrOfNodes[SIZE_LEVEL_STOCK];
-	ArrOfNodes[0] = nullptr;
-	Spaces* TmpNode;
-	ListOfLadders lst;
-	lst.head = nullptr;
-	Ladder* TmpLadder, * loltr;//list of Ladders tracker
-	int move_left_floor[SIZE_LEVEL_STOCK] = { UNUSED_LEVEL,UNUSED_LEVEL,46,57,41,65,38 };
-	int move_right_floor[SIZE_LEVEL_STOCK] = { UNUSED_LEVEL,8,49,7,11,UNUSED_LEVEL,42 };
-
+	int i;
 	m_IsColored = isColored;
-
-	CreateNodeArray(ArrOfNodes, SIZE_LEVEL_STOCK);
-	CreateListOfLadders(&lst, SIZE_LEVEL_STOCK);
-	loltr = lst.head;
-	for (int y = 0; y < BORDER_HIGHT; y++)
+	*this = board;
+	// filling the workboard with Q around it incase the 
+	for ( i = 0; i < BORDER_WIDTH; i++)
 	{
-		for (int x = 0; x < BORDER_WIDTH; x++)
-			workBoard[y][x] = SPACE_SYMB;
+		workBoard[0][i] = BOARDER_SYMB;
+		workBoard[BORDER_HIGHT - 1][i] = BOARDER_SYMB;
 	}
-	for (int x = 0; x < BORDER_WIDTH; x++)
+	for (i = 0; i < BORDER_HIGHT; i++)
 	{
-		workBoard[0][x] = BOARDER_SYMB;
-		workBoard[BORDER_HIGHT - 1][x] = BOARDER_SYMB;
-
-	}
-	for (int y = 0; y < BORDER_HIGHT; y++)
-	{
-		workBoard[y][0] = BOARDER_SYMB;
-		workBoard[y][BORDER_WIDTH - 1] = BOARDER_SYMB;
-	}
-
-	for (auto floor : levels)
-	{
-		for (int x = 1; x < BORDER_WIDTH - 1; x++)
-		{
-			workBoard[floor - 1][x] = FLOOR_SYMB;
-		}
-	}
-
-	for (int y = 0, x = 1; y < SIZE_LEVEL_STOCK; y++, x++)
-	{
-		TmpNode = ArrOfNodes[y];
-		auto floor = levels[x];
-		while (TmpNode != nullptr)
-		{
-			while (TmpNode->begining < TmpNode->end)
-			{
-				workBoard[floor - 1][TmpNode->begining] = SPACE_SYMB;
-				TmpNode->begining++;
-
-			}
-			TmpNode = TmpNode->next;
-		}
-	}
-
-	while (loltr != nullptr)
-	{
-		int size = loltr->size;
-		int y_place = levels[loltr->level];
-		int x_place = loltr->index_of_Ladder;
-		for (int i = 0; i < size; i++)
-		{
-			workBoard[y_place - 2][x_place] = LADDER_SYMB;
-			y_place--;
-		}
-		TmpLadder = loltr;
-		loltr = loltr->next;
-	}
-	FreeNodeArr(ArrOfNodes, SIZE_LEVEL_STOCK);
-	FreeListLadderNode(lst.head);
-
-	for (int i = 0; i < SIZE_LEVEL_STOCK; i++)
-	{
-		if (move_left_floor[i] != UNUSED_LEVEL)
-			AddArrow(move_left_floor[i], levels[i] - 1, MOVE_LEFT_SYMB);
-		if (move_right_floor[i] != UNUSED_LEVEL)
-			AddArrow(move_right_floor[i], levels[i] - 1, MOVE_RIGHT_SYMB);
+		workBoard[i][0] = BOARDER_SYMB;
+		workBoard[i][BORDER_WIDTH-1] = BOARDER_SYMB;
 	}
 
 }
@@ -96,22 +32,22 @@ void CBoard::Draw()
 {
 	if (m_IsColored)
 	{
-		for (int y = 0; y < BORDER_HIGHT; y++)
+		for (int y = 0; y < BORDER_HIGHT - 2; y++)
 		{
-			for (int x = 0; x < BORDER_WIDTH; x++)
+			for (int x = 0; x < BORDER_WIDTH - 2; x++)
 			{
-				DrawOneChar(workBoard[y][x]);
+				DrawOneChar(PrintBoard[y][x]);
 			}
 			cout << "\n";
 		}
 	}
 	else
 	{
-		for (int y = 0; y < BORDER_HIGHT; y++)
+		for (int y = 0; y < BORDER_HIGHT - 2; y++)
 		{
-			for (int x = 0; x < BORDER_WIDTH; x++)
+			for (int x = 0; x < BORDER_WIDTH - 2; x++)
 			{
-				cout << workBoard[y][x];
+				cout << PrintBoard[y][x];
 			}
 			cout << "\n";
 		}

@@ -149,7 +149,7 @@ void CGame::StartGame(char board[][BORDER_WIDTH])
 
 void CGame::Init(char board[][BORDER_WIDTH])
 {
-	m_board.Init(m_IsColored); // should get board.
+	m_board.Init(m_IsColored, board); // should get board.
 	FreeScreenData();
 	m_mario.SetLives(MARIO_LIVES);
 	m_DonkeyIsDead = false;
@@ -167,40 +167,41 @@ void CGame::ChooseLevel(char board[][BORDER_WIDTH])
 	int option;
 	vector<string> FileNames  = ReadDirectory();
 	int len = (int)FileNames.size();
-	int Pages = len / Amount_of_Files_on_screen;
+	int Pages = (len / Amount_of_Files_on_screen) + 1;
 	clrscr();
-
-	if(!FileNames.empty())
-
-	while (true)
+	sort(FileNames.begin(), FileNames.end()); // stl sort
+	if (!FileNames.empty())
 	{
-		PrintChooseLevel(FileNames, instance, len, Amount_of_Files_on_screen);
-		if (_kbhit())
+		PrintChooseLevel(FileNames, instance, len, Amount_of_Files_on_screen); //color
+		while (true)
 		{
-			input = _getch();
-			option = LegalButton(input,instance, len, Amount_of_Files_on_screen);
-			if (!option)
-				continue;
-			else 
+			if (_kbhit())
 			{
-				switch (input)
+				input = _getch();
+				option = LegalButton(input, instance, len, Amount_of_Files_on_screen);
+				if (!option)
+					continue;
+				else
 				{
-				case PAGE_RIGHT: // right
-					(Pages >= instance + 1) ? instance++ : instance = 0;
-					break;
-				case PAGE_LEFT:
-					if (instance > 0)
-						instance--;
-					break;
-				default:
-					m_FileName = FileNames[instance - 1];
-					if (OpenFile(fileManager,board))
-						return;
-					break;
+					switch (input)
+					{
+					case PAGE_RIGHT: // right
+						(Pages >= instance + 1) ? instance++ : instance = 0;
+						break;
+					case PAGE_LEFT:
+						if (instance > 0)
+							instance--;
+						break;
+					default:
+						m_FileName = FileNames[option + instance*Amount_of_Files_on_screen - 1];
+						if (OpenFile(fileManager, board))
+							return;
+						break;
+					}
 				}
 			}
-		}
 
+		}
 	}
 }
 void CGame::PrintChooseLevel(vector<string> FileNames, int instance, int len, int Amount_of_Files_on_screen)
@@ -210,8 +211,8 @@ void CGame::PrintChooseLevel(vector<string> FileNames, int instance, int len, in
 
 	for (int i = 0; i < filesToShow; i++)
 	{
-		CColoredPrint::pr(FileNames[startIndex + i],
-			m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE,
+		CColoredPrint::prl(FileNames[startIndex + i],
+			m_IsColored ? CColoredPrint::c_color::CYAN : CColoredPrint::c_color::WHITE,
 			CColoredPrint::c_decoration::BOLD);
 	}
 }
@@ -220,12 +221,12 @@ void CGame::PrintChooseLevel(vector<string> FileNames, int instance, int len, in
 bool CGame::OpenFile(CFile& fileManager, char board[][BORDER_WIDTH])
 {
 	if (!fileManager.OpenFile(m_FileName, m_screen)) {
-		cerr << "Failed to load file: " << fileManager.GetLastError() << endl;
+		cout << "Failed to load file: " << fileManager.GetLastError() << endl;
 		return false;
 	}
 	if (!DecipherScreen(board))
 	{
-		cerr << "The file: " << m_FileName << "contains an illegal char inside, make sure it's correct" << endl;
+		cout << "The file: " << m_FileName << "contains an illegal char inside, make sure it's correct" << endl;
 		return false;
 	}
 	return true;
@@ -233,7 +234,7 @@ bool CGame::OpenFile(CFile& fileManager, char board[][BORDER_WIDTH])
 
 int CGame::LegalButton(char input, int instance, int len, int Amount_of_Files_on_screen)
 {
-
+	int num;
 	int filesInCurrentInstance;
 	if (instance == len / Amount_of_Files_on_screen) 
 		filesInCurrentInstance = len % Amount_of_Files_on_screen;
@@ -242,9 +243,15 @@ int CGame::LegalButton(char input, int instance, int len, int Amount_of_Files_on
 
 	if (isdigit(input))
 	{
-		int num = input - '0';
+		num = input - '0';
 		if (num > 0 && num <= filesInCurrentInstance)
 			return num;
+	}
+	if (isalpha(input))
+	{
+		input = tolower(input);
+		num = input - 'a' + 1;
+		return(num);
 	}
 	if (input == '>')
 		return PAGE_RIGHT;
@@ -256,41 +263,43 @@ int CGame::LegalButton(char input, int instance, int len, int Amount_of_Files_on
 
 
 
-// goes through all the chars and looks for illegal chars 
-bool CGame:: ValidateChars() 
-{
-	// Create a set of allowed characters using class constants
-	const set<char> allowedChars =
-	{
-		BOARDER_SYMB, FLOOR_SYMB, MOVE_RIGHT_SYMB, MOVE_LEFT_SYMB,
-		LADDER_SYMB, SPACE_SYMB, AVATAR_MARIO, AVATAR_BARREL,
-		AVATAR_DONKEYKONG, AVATAR_PRINCESS, AVATAR_GHOST,
-		LEGENS_SYMB, HAMMER_SYMB, ' '
-	};
-
-	for (const string& line : m_screen) 
-	{
-		for (char ch : line) {
-			if (allowedChars.find(ch) == allowedChars.end()) {
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
+//// goes through all the chars and looks for illegal chars      delete this?
+//bool CGame:: ValidateChars() 
+//{
+//	// Create a set of allowed characters using class constants
+//	const set<char> allowedChars =
+//	{
+//		BOARDER_SYMB, FLOOR_SYMB, MOVE_RIGHT_SYMB, MOVE_LEFT_SYMB,
+//		LADDER_SYMB, SPACE_SYMB, AVATAR_MARIO, AVATAR_BARREL,
+//		AVATAR_DONKEYKONG, AVATAR_PRINCESS, AVATAR_GHOST,
+//		LEGENS_SYMB, HAMMER_SYMB, ' '
+//	};
+//
+//	for (const string& line : m_screen) 
+//	{
+//		for (char ch : line) {
+//			if (allowedChars.find(ch) == allowedChars.end()) {
+//				return false;
+//			}
+//		}
+//	}
+//
+//	return true;
+//}
+// 
+// 
 // need to be changes
 bool CGame::DecipherScreen(char board[][BORDER_WIDTH])
 {
 	m_ghosts.clear();  // Clear existing ghosts
+	char const UpperHammer = 'P';
 
 	// Parse screen with bounds checking
-	for (int i = 0; i < min(static_cast<int>(m_screen.size()), BORDER_HIGHT); ++i) {
-		for (int j = 0; j < min(static_cast<int>(m_screen[i].size()), BORDER_WIDTH); ++j) {
+	for (int i = 0; i < min(static_cast<int>(m_screen.size()), BORDER_HIGHT - 2); ++i) {
+		for (int j = 0; j < min(static_cast<int>(m_screen[i].size()), BORDER_WIDTH - 2); ++j) {
 			char symbol = m_screen[i][j];
-
-			if (!IsInBounds(i, j))
-				continue;
+			if (isalpha(symbol)) // exept the screen to be decipherd in lower and upper
+				symbol = toupper(symbol);
 
 			switch (symbol) {
 			case AVATAR_MARIO:
@@ -299,6 +308,7 @@ bool CGame::DecipherScreen(char board[][BORDER_WIDTH])
 				break;
 
 			case HAMMER_SYMB:
+			case UpperHammer:
 				m_hammer = CItem(j, i, HAMMER_SYMB,
 					m_IsColored ? CColorPoint::MAGENTA : CColorPoint::WHITE);
 				break;
@@ -315,7 +325,7 @@ bool CGame::DecipherScreen(char board[][BORDER_WIDTH])
 
 			case AVATAR_GHOST:
 				m_ghosts.push_back(CMovingItem(j, i, AVATAR_GHOST,
-					m_IsColored ? CColorPoint::BLUE : CColorPoint::WHITE));
+					m_IsColored ? CColorPoint::BLUE : CColorPoint::WHITE , BORDER_HIGHT + 1)); //  max fall is BORDER_HIGHT just in case they spawn in the air and need to fall. ghost are dead already therfore they can't die again from fall
 				break;
 
 			case LEGENS_SYMB:
@@ -342,10 +352,12 @@ bool CGame::DecipherScreen(char board[][BORDER_WIDTH])
 
 	// Set initial direction for ghosts
 	for (auto& ghost : m_ghosts) {
-		ghost.SetDirection(CMovingItem::RIGHT);
-	}
+		ghost.SetDirection(CMovingItem::RIGHT); //arbitrary 
 
-	return true; // Everything was processed successfully
+	}
+	if (NecessaryItemExicst())
+		return true;
+	return false; // Everything was processed successfully
 }
 
 vector<string> CGame::ReadDirectory()
@@ -369,6 +381,23 @@ vector<string> CGame::ReadDirectory()
 	return Names;
 }
 
+bool CGame::NecessaryItemExicst()
+{
+
+	if (m_mario == CMovingItem())
+		return false;
+
+	if (m_donkeykong == CItem())
+		return false;
+
+	if (m_princess == CItem())
+		return false;
+
+	if (m_Legend == CPoint())
+		return false;
+
+	return true;
+}
 // called upon after a death, returns mario to spawn point
 void CGame::ResetPlayer()
 {

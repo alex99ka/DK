@@ -2,8 +2,8 @@
 #include "Item.h"
 #include<iostream>
 
-static constexpr int BORDER_HIGHT = 25;
-static constexpr int BORDER_WIDTH = 80;
+static constexpr int BORDER_HIGHT = 27;
+static constexpr int BORDER_WIDTH = 82;
 // a node that states when to start and end a gap on the platform
 typedef struct SPACES {
 	int begining;
@@ -54,7 +54,7 @@ class CBoard
 public:
 	enum Board_Place { BOARDER, FLOOR, LADDER, FREE, OUT_OB, ARROW_RIGHT, ARROW_LEFT };
 
-	void Init(bool isColored);
+	void Init(bool isColored, char board[][BORDER_WIDTH]);
 	void SetColored(bool isColored) { m_IsColored = isColored; }
 	void Draw();
 	int GetBorderHight() { return BORDER_HIGHT; };
@@ -62,7 +62,24 @@ public:
 	enum Board_Place GetBoardPlace(CPoint& const point);
 	bool GetBoardSymbol(CPoint& coord, char* symbol, CColorPoint::c_color* color);
 	void UpdateWorkBoard(int x, int y, char symbol);
+	void operator=(const char board[][BORDER_WIDTH])
+	{
+		for (int i = 0; i < BORDER_HIGHT; i++)
+		{
+			for (int j = 0; j < BORDER_WIDTH; j++)
+			{
+				workBoard[i][j] = board[i][j];
+			}
+		}
 
+		for (int i = 0; i < BORDER_HIGHT - 2; i++)
+		{
+			for (int j = 0; j < BORDER_WIDTH - 2; j++)
+			{
+				PrintBoard[i][j] = board[i][j];
+			}
+		}
+	}
 private:
 	//void RestoreBoard
 	void DrawOneChar(char ch);
@@ -82,6 +99,7 @@ private:
 	void FreeListLadderNode(Ladder *node);
 	CColorPoint::c_color GetCharColor(char ch);
 	char workBoard[BORDER_HIGHT][BORDER_WIDTH] = {};
+	char PrintBoard[BORDER_HIGHT-2][BORDER_WIDTH-2] = {};
 	bool m_IsColored = true;
 };
 

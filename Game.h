@@ -10,7 +10,6 @@
 #include "Item.h"
 #include "string.h"
 #include "File.h"
-namespace fs = std::filesystem;
 
 
 class CGame
@@ -32,7 +31,7 @@ private:
 	static constexpr char AVATAR_BARREL = 'O';
 	static constexpr char AVATAR_DONKEYKONG = '&';
 	static constexpr char AVATAR_PRINCESS = '$';
-	static constexpr char AVATAR_GHOST = 'x';
+	static constexpr char AVATAR_GHOST = 'X';
 	static constexpr char LEGENS_SYMB = 'L';
 	static constexpr char HAMMER_SYMB= 'p';
 	static constexpr char FLOOR_SYMB = '=';
@@ -57,9 +56,10 @@ private:
 	void PrintChooseLevel(vector<string> FileNames, int instance, int len, int Amount_of_Files_on_screen);
 	bool OpenFile(CFile& fileManager, char board[][BORDER_WIDTH]);
 	int LegalButton(char input, int instance, int len, int Amount_of_Files_on_screen);
-	bool ValidateChars();
+	//bool ValidateChars();
 	bool DecipherScreen(char board[][BORDER_WIDTH]);
 	vector<string> ReadDirectory();
+	bool NecessaryItemExicst();
 
 	void PrintMenu();
 	MenuDecision GetMenuDecision(char board[][BORDER_WIDTH]);
@@ -101,11 +101,11 @@ private:
 	CMovingItem m_mario;
 	CItem m_donkeykong;
 	CItem m_princess;
+	CItem m_hammer;
 	vector<CMovingItem> m_barrels;
 	CBoard m_board;
 	ScreenData m_data;
 	CPoint m_Legend;
-	CItem m_hammer;
 };
 
 
