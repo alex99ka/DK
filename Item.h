@@ -32,9 +32,11 @@ public:
 		: CPoint(x, y), m_symbol(c), m_color(color) { }
 
 	char GetSymbol() const { return m_symbol; }
+	void HammerActivated(char c) { m_symbol = c; SetColor(CColorPoint::BLUE); }
 	void SetRestoreSymbol(char ch, CColorPoint::c_color color) { m_RestoreSymbol = ch; m_RestoreColor = color; }
 	CColorPoint::c_color GetColor() const { return m_color; }
 	void SetColor(CColorPoint::c_color color) { m_color = m_color; }
+	void Respawn(char avatar, CColorPoint::c_color color = CColorPoint::c_color::GREEN) { m_symbol = avatar, m_color = color; }
 	
 	void Draw() { _draw(m_symbol, m_color); }
 	void Erase() { _draw(m_RestoreSymbol, m_RestoreColor); }

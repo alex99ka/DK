@@ -267,6 +267,7 @@ bool CGame::DecipherScreen(char board[][BORDER_WIDTH - 2])
 {
 	m_ghosts.clear();  // Clear existing ghosts
 	char const UpperHammer = 'P';
+	int hammer_counter{};
 	/*for (string line : m_screen)
 		cout << line << endl;*/
 		// Parse screen with bounds checking
@@ -285,8 +286,12 @@ bool CGame::DecipherScreen(char board[][BORDER_WIDTH - 2])
 
 			case HAMMER_SYMB:
 			case UpperHammer:
+				if (hammer_counter != 0)
+					return false;
+				hammer_counter++;
 				m_hammer = CItem(j, i, HAMMER_SYMB,
-					m_IsColored ? CColorPoint::MAGENTA : CColorPoint::WHITE);
+					m_IsColored ? CColorPoint::GREEN : CColorPoint::WHITE);
+				m_IsHammer = true; //  indicate that the hammer should be printed 
 				board[i][j] = SPACE_SYMB;
 				break;
 
@@ -304,7 +309,7 @@ bool CGame::DecipherScreen(char board[][BORDER_WIDTH - 2])
 
 			case AVATAR_GHOST:
 				m_ghosts.push_back(CMovingItem(j, i, AVATAR_GHOST,
-					m_IsColored ? CColorPoint::BLUE : CColorPoint::WHITE, BORDER_HIGHT + 1)); //  max fall is BORDER_HIGHT just in case they spawn in the air and need to fall. ghost are dead already therfore they can't die again from fall
+					 CColorPoint::WHITE, BORDER_HIGHT + 1)); //  max fall is BORDER_HIGHT just in case they spawn in the air and need to fall. ghost are dead already therfore they can't die again from fall
 				board[i][j] = SPACE_SYMB;
 				break;
 
@@ -413,11 +418,33 @@ bool CGame::NecessaryItemExicst()
 void CGame::ResetPlayer()
 {
 	EraseCharacter(m_mario);
-	m_mario.SetX(m_mario.GetXSpawn());
+		m_mario.SetX(m_mario.GetXSpawn());
 	m_mario.SetY(m_mario.GetYSpawn());
+	m_mario.Respawn(AVATAR_MARIO);
 	m_mario.ReduceLife();
 	m_mario.ResetFalls();
 	m_mario.SetDirection(CMovingItem::STOP);
+}
+
+void CGame::ChangeAllEntitysColor()
+{
+	CColorPoint::c_color GhostColor;
+	CColorPoint::c_color BarrelColor;
+	if (m_IsHammerActive)
+	{
+		GhostColor = CColorPoint::BLUE;
+		BarrelColor = CColorPoint::BLUE;
+	}
+	else
+	{
+		GhostColor = CColorPoint::WHITE;
+		BarrelColor = CColorPoint::RED;
+	}
+
+	for (auto ghost : m_ghosts)
+		ghost.ChangeColor(GhostColor);
+	for (auto barrel : m_barrels)
+		barrel.ChangeColor(BarrelColor);
 }
 
 void CGame::ResetMovingItems()
@@ -430,6 +457,7 @@ void CGame::ResetMovingItems()
 		ghost.SetY(ghost.GetYSpawn());
 	}
 	m_barrels.clear();
+	
 }
 
 void CGame::PlayLoop()
@@ -888,7 +916,7 @@ CGame::LiveStatus CGame::AddBarrel()
 	return ALIVE;
 }
 
-void CGame::EraseCharacter(CMovingItem& character)
+void CGame::EraseCharacter(CItem& character)
 {
 	char symbol;
 	CColorPoint::c_color color;
@@ -906,20 +934,21 @@ bool CGame::IsInBounds(int i, int j) const
 
 CGame::NeighboorType CGame::WhoSomeoneNextToMe(CPoint& point)
 {
-	if (m_DonkeyIsDead)
-	{
-		if (m_princess.Compare(point))
-			return PRINCESS;
-	} else {
-		if (m_donkeykong.Compare(point))
-		return DONKEYKONG;
-	}
-
 	for (CMovingItem& barrel : m_barrels) {
 		if (barrel.Compare(point))
 			return BARREL;
 	}
-	
+	for (CMovingItem& ghost : m_ghosts) {
+		if (ghost.Compare(point))
+			return GHOST;
+	}
+	if (m_princess.Compare(point))
+		return PRINCESS;
+	if (m_donkeykong.Compare(point))
+	return DONKEYKONG;
+	if (m_IsHammer && m_hammer.Compare(point))
+		return HAMMER;
+
 	return NONE;
 }
 
@@ -946,13 +975,17 @@ CGame::LiveStatus CGame::MovePlayer(CMovingItem& character, CPoint& newPos)
 	case DONKEYKONG:
 		if (m_DonkeyIsDead == false) {
 			m_donkeykong.ChangeColor(m_IsColored ? CColorPoint::RED : CColorPoint::BLACK);
-			CreatePrincess();
-		    m_DonkeyIsDead = true;
 		}
 		EraseCharacter(character);
 		break;
 	case PRINCESS:
 		return WON;
+	case HAMMER:
+		m_IsHammerActive = true;
+		EraseCharacter(m_hammer);
+		character.HammerActivated(AVATAR_MARIO_WITH_HAMMER);
+		ChangeAllEntitysColor();
+		EraseCharacter(character);
 	}
 
 	character.SetCoord(newPos.GetX() , newPos.GetY());
@@ -1110,6 +1143,8 @@ bool CGame::GameOver()
 {
 	CharacterDeathAnimation(m_mario);
 	ResetMovingItems();
+	m_IsHammer = false; // a hammer is avaliable only on the first try
+	m_IsHammerActive = false;
 	
 	if (m_mario.GetLives() == 0) {
     	GameOverScreen();
@@ -1230,6 +1265,7 @@ void CGame::CharacterDeathAnimation(CMovingItem& character)
 			else
 				character.ChangeColor(CColorPoint::GREEN);
 		}
+
 		character.Draw();
 		Sleep(100);
 	}
@@ -1248,4 +1284,5 @@ void CGame::CharacterDeathAnimation(CMovingItem& character)
 		character.Draw();
 		Sleep(150);
 	}
+
 }

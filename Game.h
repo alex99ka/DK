@@ -8,16 +8,17 @@
 #include <regex>
 #include "Board.h"
 #include "Item.h"
-#include "string.h"
+#include "string.h"(
 #include "File.h"
 
 
 class CGame
 {
-public: 
+public:
 	void Start();
 private:
-	enum NeighboorType {NONE, BARREL, DONKEYKONG, PRINCESS, GHOST};
+	enum NeighboorType {
+		NONE, BARREL, DONKEYKONG, PRINCESS, GHOST, HAMMER};
 	enum MenuDecision { GAME_START, GAME_END };
 	enum LiveStatus { DEAD, ALIVE, WON };
     enum ScreenType { MAIN_MENU, PAUSE_MENU };
@@ -28,6 +29,7 @@ private:
 	static constexpr int PAGE_RIGHT = -1;
 	static constexpr int PAGE_LEFT = -2;
 	static constexpr char AVATAR_MARIO = '@';
+	static constexpr char AVATAR_MARIO_WITH_HAMMER = 'M';
 	static constexpr char AVATAR_BARREL = 'O';
 	static constexpr char AVATAR_DONKEYKONG = '&';
 	static constexpr char AVATAR_PRINCESS = '$';
@@ -47,10 +49,11 @@ private:
 	static constexpr int BARREL_FREQUENCY_BIRTH = 25;
 	static constexpr int MAX_FALL_BARREL = 8;
 
+	vector<string> ReadDirectory();
+	MenuDecision Paused();
 	void StartGame(char board[][BORDER_WIDTH - 2]);
 	void Init(char board[][BORDER_WIDTH - 2]);
 	void PlayLoop();
-	MenuDecision Paused();
 	void ResetScreen();
 	void ChooseLevel(char board[][BORDER_WIDTH - 2]);
 	void PrintChooseLevel(vector<string> FileNames, int instance, int len, int Amount_of_Files_on_screen);
@@ -58,11 +61,10 @@ private:
 	int LegalButton(char input, int instance, int len, int Amount_of_Files_on_screen);
 	//bool ValidateChars();
 	bool DecipherScreen(char board[][BORDER_WIDTH - 2]);
-	vector<string> ReadDirectory();
 	bool NecessaryItemExicst();
 
-	void PrintMenu();
 	MenuDecision GetMenuDecision(char board[][BORDER_WIDTH - 2]);
+	void PrintMenu();
 	void PrintInstructions(ScreenType type);
 	void PrintGoodbye();
 	void PrintCongratulation();
@@ -77,13 +79,13 @@ private:
 	LiveStatus AddBarrel();
 	LiveStatus BarrelMoving(CMovingItem& barrel);
 	LiveStatus BarrelsMoving();
-	bool BarrelFlowCollision(CMovingItem& barrel, CMovingItem::Directions direction, CPoint& newPos);
-	void ResetBarrel(CMovingItem& barrel);
 	LiveStatus ExplosionBarrel(CMovingItem& barrel);
-	bool IsHitPlayer(CPoint& barrel);
 	LiveStatus GhostsMoving();
 	LiveStatus GhostMoving(CMovingItem& ghost);
 	LiveStatus SwitchGhostDirection(CMovingItem& ghost);
+	void ResetBarrel(CMovingItem& barrel);
+	bool IsHitPlayer(CPoint& barrel);
+	bool BarrelFlowCollision(CMovingItem& barrel, CMovingItem::Directions direction, CPoint& newPos);
 	void GhostCollision(CMovingItem& ghost);
 
 
@@ -92,8 +94,9 @@ private:
 	NeighboorType WhoSomeoneNextToMe(CPoint& point);
 	void FallCharacter(CMovingItem& character);
 	void ResetPlayer();
+	void ChangeAllEntitysColor();
 	void ResetMovingItems();
-	void EraseCharacter(CMovingItem& character);
+	void EraseCharacter(CItem& character);
 	bool IsInBounds(int i, int j) const;
 
 	string m_FileNames[AMOUNT_OF_FILES];
@@ -104,6 +107,7 @@ private:
 	int m_nBarrels = MAX_NUM_BARRELS;
 	bool m_IsColored = true;
 	bool m_IsHammer = false;
+	bool m_IsHammerActive = false;
 	CFile m_file;
 	CMovingItem m_mario;
 	CItem m_donkeykong;
