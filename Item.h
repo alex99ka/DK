@@ -60,13 +60,15 @@ public:
 	enum Directions { STOP, RIGHT, LEFT, UP, DOWN };
 
 	CMovingItem(int x = 0, int y = 0, char c = ' ', CColorPoint::c_color color = CColorPoint::c_color::WHITE, int MaxFall = 5)
-		:CItem(x, y, c, color), m_Xdirection(0), m_Ydirection(0), m_MaxFall(MaxFall) {
+		:CItem(x, y, c, color), m_Xspawn(x), m_Yspawn(y),  m_Xdirection(0), m_Ydirection(0), m_MaxFall(MaxFall)  {
 		m_direction = STOP;
 		m_prevDirection = STOP;
 	}
 
 	int GetXDirection() { return m_Xdirection; }
 	int GetYDirection()	{ return m_Ydirection; }
+	int GetXSpawn() { return m_Xspawn; }
+	int GetYSpawn() { return m_Yspawn; }
 	enum Directions GetDirection() { return m_direction; };
 	enum Directions GetPrevDirection() { return m_prevDirection; };
 	bool IsStop() { return (m_direction == STOP); }
@@ -89,5 +91,7 @@ private:
 	enum Directions m_direction;
 	enum Directions m_prevDirection;
 	int m_lives = 1;
+	int m_Xspawn;
+	int m_Yspawn;
 };
 

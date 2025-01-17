@@ -35,7 +35,6 @@ struct ScreenData {
 class CFile {
 public:
     bool OpenFile(const string& FileName, vector<string>& screen);
-    bool ValidateLines(const vector<string>& screen);
     string GetLastError() const;
 
     bool ParseScreenData(vector<string>& screen, ScreenData& data);

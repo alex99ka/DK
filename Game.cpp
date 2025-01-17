@@ -62,11 +62,13 @@ CGame::MenuDecision CGame::GetMenuDecision(char board[][BORDER_WIDTH - 2])
 		 switch (choice)
 		 {
 		 case '1':
-		//	 if (m_mario == CMovingItem()) // file was loaded because mario was created
-				 return  CGame::GAME_START;
-			// else
-			//	 cout<<"you need to choose working file"<<endl ;
-			 break;
+			 if (!DecipherScreen(board))
+			 {
+				// m_board = {}; // clear board;
+				 cout << "The file: " << m_FileName << "contains an illegal char inside, make sure it's correct" <<" or a file wan't loaded" << endl;
+				 break;
+			 }
+			 return GAME_START;
 		 case '2':
 			 m_IsColored = !m_IsColored;// toggle 
 			 PrintMenu();
@@ -139,6 +141,7 @@ void CGame::PrintGoodbye()
 {
 	clrscr();
 	CColoredPrint::prl("Goodbye, friend!\n", CColoredPrint::c_color::CYAN);
+	Sleep(100);
 }
 
 void CGame::StartGame(char board[][BORDER_WIDTH - 2])
@@ -150,6 +153,7 @@ void CGame::StartGame(char board[][BORDER_WIDTH - 2])
 void CGame::Init(char board[][BORDER_WIDTH - 2])
 {
 	m_board.Init(m_IsColored, board); // should get board.
+	ResetMovingItems();
 	m_mario.SetLives(MARIO_LIVES);
 //	m_DonkeyIsDead = false;
 	m_nBarrels = MAX_NUM_BARRELS;
@@ -222,12 +226,6 @@ bool CGame::OpenFile(CFile& fileManager, char board[][BORDER_WIDTH - 2])
 {
 	if (!fileManager.OpenFile(m_FileName, m_screen)) {
 		cout << "Failed to load file: " << fileManager.GetLastError() << endl;
-		return false;
-	}
-	if (!DecipherScreen(board))
-	{
-		m_board = {}; // clear board;
-		cout << "The file: " << m_FileName << "contains an illegal char inside, make sure it's correct" << endl;
 		return false;
 	}
 	clrscr();
@@ -402,11 +400,23 @@ bool CGame::NecessaryItemExicst()
 void CGame::ResetPlayer()
 {
 	EraseCharacter(m_mario);
-	m_mario.SetX(2);
-	m_mario.SetY(m_board.GetBorderHight() - 2);
+	m_mario.SetX(m_mario.GetXSpawn());
+	m_mario.SetY(m_mario.GetYSpawn());
 	m_mario.ReduceLife();
 	m_mario.ResetFalls();
 	m_mario.SetDirection(CMovingItem::STOP);
+}
+
+void CGame::ResetMovingItems()
+{
+	ResetPlayer();
+	clrscr();
+	for (auto ghost : m_ghosts)
+	{
+		ghost.SetX(ghost.GetXSpawn());
+		ghost.SetY(ghost.GetYSpawn());
+	}
+	m_barrels.clear();
 }
 
 void CGame::PlayLoop()
@@ -475,6 +485,12 @@ void CGame::PlayLoop()
 				return;
 		}
 
+		if (GhostsMoving() == DEAD)
+		{
+			if (GameOver() == false) // game finished
+				return;
+		}
+
 		switch(PlayerCheckNextCell(m_mario))
 		{
 		case DEAD:
@@ -509,13 +525,12 @@ void CGame::ResetScreen()
 // triggerd by the esc button
 CGame::MenuDecision CGame::Paused()
 {
-	bool flag(true);
 	char choice, prevchioce= '\0';
 
 	clrscr();
 	PrintPauseMenu();
 
-	while (flag)
+	while (true)
 	{
 		if (_kbhit())
 		{
@@ -632,6 +647,22 @@ CGame::LiveStatus CGame::GhostsMoving()
 	return ALIVE;
 }
 
+void CGame::GhostCollision(CMovingItem& ghost)
+{
+
+	for (auto& t_ghost : m_ghosts)
+	{
+		// Skip if it's the same object 
+		if (&ghost == &t_ghost)
+			continue;
+		if (ghost == t_ghost)
+		{
+			SwitchGhostDirection(ghost);
+			return;
+		}
+	}
+}
+
 CGame::LiveStatus CGame::GhostMoving(CMovingItem& ghost)
 {
 	if (IsHitPlayer(ghost))
@@ -643,7 +674,26 @@ CGame::LiveStatus CGame::GhostMoving(CMovingItem& ghost)
 	CPoint newPos = CPoint(ghost.GetX() + ghost.GetXDirection(), ghost.GetY()); // next render location
 	CBoard::Board_Place nextPlace = m_board.GetBoardPlace(newPos);
 	  // uncharted water
-	switch (nextPlace) {
+	switch (nextPlace)
+	{
+	case CBoard::Board_Place::FLOOR:
+	case CBoard::Board_Place::BOARDER:
+		SwitchGhostDirection(ghost);
+		return ALIVE;
+	case CBoard::Board_Place::LADDER:
+	case CBoard::Board_Place::FREE:
+		CPoint downPos(newPos.GetX(), newPos.GetY() + 1);
+		if (m_board.GetBoardPlace(downPos) == CBoard::Board_Place::FREE)
+			SwitchGhostDirection(ghost);
+		break;
+	}
+
+	EraseCharacter(ghost);
+	ghost.SetCoord(newPos.GetX(), newPos.GetY());
+	ghost.Draw(); 
+	return ALIVE;
+	
+	/*switch (nextPlace) {
 	case CBoard::Board_Place::FLOOR:
 	case CBoard::Board_Place::BOARDER:
 		SwitchGhostDirection(ghost);
@@ -672,14 +722,11 @@ CGame::LiveStatus CGame::GhostMoving(CMovingItem& ghost)
 			FallCharacter(ghost);
 	}
 	break;
-	case CBoard::Board_Place::LADDER:
 		break;
 	}
 
+	*/
 
-	ghost.SetCoord(newPos.GetX(), newPos.GetY());
-	ghost.Draw();
-	return ALIVE;
 }
 
 CGame::LiveStatus CGame::SwitchGhostDirection(CMovingItem& ghost)
@@ -758,8 +805,8 @@ CGame::LiveStatus  CGame::BarrelMoving(CMovingItem& barrel)
 			else if (downPlace == CBoard::Board_Place::ARROW_RIGHT) {
 				barrel.SetDirection(CMovingItem::RIGHT);
 				newPos.SetCoord(barrel.GetX() + barrel.GetXDirection(), barrel.GetY());
-			} else if (downPlace == CBoard::Board_Place::LADDER)
-				barrel.SetDirection(CMovingItem::DOWN);
+			} /*else if (downPlace == CBoard::Board_Place::LADDER)
+				barrel.SetDirection(CMovingItem::DOWN);*/
 		}
 		if (downPlace == CBoard::Board_Place::FREE)
 			FallCharacter(barrel);
@@ -863,11 +910,13 @@ CGame::NeighboorType CGame::WhoSomeoneNextToMe(CPoint& point)
 
 CGame::LiveStatus CGame::MovePlayer(CMovingItem& character, CPoint& newPos)
 {
-	CGame::NeighboorType neigboorType;
+	CGame::NeighboorType neigboorType , thisneighboor;
 
 	neigboorType = WhoSomeoneNextToMe(newPos);
-	if (WhoSomeoneNextToMe(character) == BARREL)
-		neigboorType = BARREL;
+	thisneighboor = WhoSomeoneNextToMe(character);
+	if (thisneighboor == BARREL || thisneighboor == GHOST)
+		return DEAD;
+	
 
 	switch (neigboorType)
 	{
@@ -876,6 +925,7 @@ CGame::LiveStatus CGame::MovePlayer(CMovingItem& character, CPoint& newPos)
 			EraseCharacter(character);
 		}
 		break;
+	case GHOST:
 	case BARREL:
 		return DEAD;
 	case DONKEYKONG:
@@ -1044,7 +1094,7 @@ void CGame::PrintCongratulation()
 bool CGame::GameOver()
 {
 	CharacterDeathAnimation(m_mario);
-	ResetPlayer();
+	ResetMovingItems();
 	
 	if (m_mario.GetLives() == 0) {
     	GameOverScreen();
@@ -1121,7 +1171,9 @@ void CGame::DrawHearts()
 	for (i = 0; i < lives; i++)
 		CColoredPrint::pr("<3", m_IsColored ? CColoredPrint::c_color::RED : CColorPoint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
 }
-// triggerd after donkey was deafeated
+//// triggerd after donkey was deafeated
+
+// should be deleted 
 void CGame::CreatePrincess()
 {
 	int princessY = 3, princessX = 67;

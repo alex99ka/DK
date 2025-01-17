@@ -17,7 +17,7 @@ class CGame
 public: 
 	void Start();
 private:
-	enum NeighboorType {NONE, BARREL, DONKEYKONG, PRINCESS};
+	enum NeighboorType {NONE, BARREL, DONKEYKONG, PRINCESS, GHOST};
 	enum MenuDecision { GAME_START, GAME_END };
 	enum LiveStatus { DEAD, ALIVE, WON };
     enum ScreenType { MAIN_MENU, PAUSE_MENU };
@@ -84,6 +84,7 @@ private:
 	LiveStatus GhostsMoving();
 	LiveStatus GhostMoving(CMovingItem& ghost);
 	LiveStatus SwitchGhostDirection(CMovingItem& ghost);
+	void GhostCollision(CMovingItem& ghost);
 
 
 	LiveStatus PlayerCheckNextCell(CMovingItem& character);
@@ -91,10 +92,11 @@ private:
 	NeighboorType WhoSomeoneNextToMe(CPoint& point);
 	void FallCharacter(CMovingItem& character);
 	void ResetPlayer();
+	void ResetMovingItems();
 	void EraseCharacter(CMovingItem& character);
 	bool IsInBounds(int i, int j) const;
 
-	string m_FileNames[AMOUNT_OF_FILES] = { "dkong_a.screen","dkong_b.screen" ,"dkong_c.screen" ,"dkong_d.screen" };
+	string m_FileNames[AMOUNT_OF_FILES];
 	string m_FileName = " "; // player must choose a screen from the options
 	vector<string> m_screen = {}; // default empty
 	vector<CMovingItem> m_ghosts;  // ghost vector
