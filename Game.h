@@ -54,7 +54,7 @@ private:
 	void ResetScreen();
 	void ChooseLevel(char board[][BORDER_WIDTH - 2]);
 	void PrintChooseLevel(vector<string> FileNames, int instance, int len, int Amount_of_Files_on_screen);
-	bool OpenFile(CFile& fileManager, char board[][BORDER_WIDTH - 2 ]);
+	bool OpenFile(CFile& fileManager);
 	int LegalButton(char input, int instance, int len, int Amount_of_Files_on_screen);
 	//bool ValidateChars();
 	bool DecipherScreen(char board[][BORDER_WIDTH - 2]);
@@ -103,6 +103,7 @@ private:
 	bool m_DonkeyIsDead = false;
 	int m_nBarrels = MAX_NUM_BARRELS;
 	bool m_IsColored = true;
+	bool m_IsHammer = false;
 	CFile m_file;
 	CMovingItem m_mario;
 	CItem m_donkeykong;

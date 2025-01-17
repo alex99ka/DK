@@ -198,7 +198,7 @@ void CGame::ChooseLevel(char board[][BORDER_WIDTH - 2])
 						break;
 					default:
 						m_FileName = FileNames[option + instance*Amount_of_Files_on_screen - 1];
-						if (OpenFile(fileManager, board))
+						if (OpenFile(fileManager))
 							return;
 						break;
 					}
@@ -222,7 +222,7 @@ void CGame::PrintChooseLevel(vector<string> FileNames, int instance, int len, in
 }
 
 // checks if the file is correct and of not prints to correct error
-bool CGame::OpenFile(CFile& fileManager, char board[][BORDER_WIDTH - 2])
+bool CGame::OpenFile(CFile& fileManager)
 {
 	if (!fileManager.OpenFile(m_FileName, m_screen)) {
 		cout << "Failed to load file: " << fileManager.GetLastError() << endl;
@@ -269,7 +269,7 @@ bool CGame::DecipherScreen(char board[][BORDER_WIDTH - 2])
 	char const UpperHammer = 'P';
 	/*for (string line : m_screen)
 		cout << line << endl;*/
-	// Parse screen with bounds checking
+		// Parse screen with bounds checking
 	for (int i = 0; i < min(static_cast<int>(m_screen.size()), BORDER_HIGHT - 2); ++i) {
 		for (int j = 0; j < min(static_cast<int>(m_screen[i].size()), BORDER_WIDTH - 2); ++j) {
 			char symbol = m_screen[i][j];
@@ -278,33 +278,33 @@ bool CGame::DecipherScreen(char board[][BORDER_WIDTH - 2])
 
 			switch (symbol) {
 			case AVATAR_MARIO:
-				m_mario = CMovingItem(j , i , AVATAR_MARIO, // the + 1 is for the offset cause by rpint board
+				m_mario = CMovingItem(j, i, AVATAR_MARIO, // the + 1 is for the offset cause by rpint board
 					m_IsColored ? CColorPoint::GREEN : CColorPoint::WHITE);
 				board[i][j] = SPACE_SYMB;
 				break;
 
 			case HAMMER_SYMB:
 			case UpperHammer:
-				m_hammer = CItem(j , i, HAMMER_SYMB,
+				m_hammer = CItem(j, i, HAMMER_SYMB,
 					m_IsColored ? CColorPoint::MAGENTA : CColorPoint::WHITE);
 				board[i][j] = SPACE_SYMB;
 				break;
 
 			case AVATAR_PRINCESS:
-				m_princess = CItem(j , i , AVATAR_PRINCESS,
+				m_princess = CItem(j, i, AVATAR_PRINCESS,
 					m_IsColored ? CColorPoint::MAGENTA : CColorPoint::WHITE);
 				board[i][j] = SPACE_SYMB;
 				break;
 
 			case AVATAR_DONKEYKONG:
-				m_donkeykong = CItem(j , i , AVATAR_DONKEYKONG,
+				m_donkeykong = CItem(j, i, AVATAR_DONKEYKONG,
 					m_IsColored ? CColorPoint::CYAN : CColorPoint::WHITE);
 				board[i][j] = SPACE_SYMB;
 				break;
 
 			case AVATAR_GHOST:
-				m_ghosts.push_back(CMovingItem(j , i , AVATAR_GHOST,
-					m_IsColored ? CColorPoint::BLUE : CColorPoint::WHITE , BORDER_HIGHT + 1)); //  max fall is BORDER_HIGHT just in case they spawn in the air and need to fall. ghost are dead already therfore they can't die again from fall
+				m_ghosts.push_back(CMovingItem(j, i, AVATAR_GHOST,
+					m_IsColored ? CColorPoint::BLUE : CColorPoint::WHITE, BORDER_HIGHT + 1)); //  max fall is BORDER_HIGHT just in case they spawn in the air and need to fall. ghost are dead already therfore they can't die again from fall
 				board[i][j] = SPACE_SYMB;
 				break;
 
@@ -336,8 +336,9 @@ bool CGame::DecipherScreen(char board[][BORDER_WIDTH - 2])
 		ghost.SetDirection(CMovingItem::RIGHT); //arbitrary 
 
 	}
-	
+
 	return NecessaryItemExicst(); // Everything was processed successfully
+			
 }
 
 vector<string> CGame::ReadDirectory()
@@ -365,13 +366,25 @@ bool CGame::NecessaryItemExicst()
 {
 	// First check if items exist
 	if (m_mario == CMovingItem())
+	{
+		cout << "mario was missing" << endl;
 		return false;
+	}
 	if (m_donkeykong == CItem())
+	{
+		cout << "Donkey Kong was missing" << endl;
 		return false;
+	}
 	if (m_princess == CItem())
+	{
+		cout << "Pauline was missing" << endl;
 		return false;
+	}
 	if (m_Legend == CPoint())
+	{
+		cout << "The Legend was missing" << endl;
 		return false;
+	}
 
 	// Then check if they're not on borders
 	// Check mario
@@ -428,8 +441,6 @@ void CGame::PlayLoop()
 
 	hideCursor();
 	m_mario.Draw();
-	m_donkeykong.Draw();
-	m_princess.Draw();
 	DrawGhost();
 
 	while (Mario = Italian)
@@ -503,6 +514,10 @@ void CGame::PlayLoop()
 		case ALIVE:
 			break;
 		} 
+		if (m_IsHammer)
+			m_hammer.Draw();
+		m_donkeykong.Draw();
+		m_princess.Draw();
 		DrawHearts();
 		std::cout.flush(); 
 		Sleep(SLEEP_TIME);
