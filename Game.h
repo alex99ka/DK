@@ -22,10 +22,10 @@ private:
 	enum MenuDecision { GAME_START, GAME_END };
 	enum LiveStatus { DEAD, ALIVE, WON };
     enum ScreenType { MAIN_MENU, PAUSE_MENU };
+	enum ScorePoints {GHOST_HIT = 50, BARREL_HIT = 50, DONKEY_KONG_HIT = 150};
 	
 	static constexpr int ESC_KEY = 27;
 	static constexpr int MARIO_LIVES = 3;
-	static constexpr int AMOUNT_OF_FILES = 4;
 	static constexpr int PAGE_RIGHT = -1;
 	static constexpr int PAGE_LEFT = -2;
 	static constexpr char AVATAR_MARIO = '@';
@@ -49,13 +49,14 @@ private:
 	static constexpr int BARREL_FREQUENCY_BIRTH = 25;
 	static constexpr int MAX_FALL_BARREL = 8;
 
-	vector<string> ReadDirectory();
+	void ReadDirectory();
 	MenuDecision Paused();
+	void LevelSelector(int& ind, char board[][BORDER_WIDTH - 2]);
 	void StartGame(char board[][BORDER_WIDTH - 2]);
 	void Init(char board[][BORDER_WIDTH - 2]);
-	void PlayLoop();
+	MenuDecision PlayLoop();
 	void ResetScreen();
-	void ChooseLevel(char board[][BORDER_WIDTH - 2]);
+	void ChooseLevel(char board[][BORDER_WIDTH - 2], int &ind);
 	void PrintChooseLevel(vector<string> FileNames, int instance, int len, int Amount_of_Files_on_screen);
 	bool OpenFile(CFile& fileManager);
 	int LegalButton(char input, int instance, int len, int Amount_of_Files_on_screen);
@@ -63,7 +64,7 @@ private:
 	bool DecipherScreen(char board[][BORDER_WIDTH - 2]);
 	bool NecessaryItemExicst();
 
-	MenuDecision GetMenuDecision(char board[][BORDER_WIDTH - 2]);
+	MenuDecision GetMenuDecision(char board[][BORDER_WIDTH - 2], int &ind);
 	void PrintMenu();
 	void PrintInstructions(ScreenType type);
 	void PrintGoodbye();
@@ -87,7 +88,7 @@ private:
 	bool IsHitPlayer(CPoint& barrel);
 	bool BarrelFlowCollision(CMovingItem& barrel, CMovingItem::Directions direction, CPoint& newPos);
 	void GhostCollision(CMovingItem& ghost);
-
+	void UseHammer();
 
 	LiveStatus PlayerCheckNextCell(CMovingItem& character);
 	CGame::LiveStatus MovePlayer(CMovingItem& character, CPoint& newPos);
@@ -99,15 +100,18 @@ private:
 	void EraseCharacter(CItem& character);
 	bool IsInBounds(int i, int j) const;
 
-	string m_FileNames[AMOUNT_OF_FILES];
+
+	vector<string> m_FileNames;
 	string m_FileName = " "; // player must choose a screen from the options
 	vector<string> m_screen = {}; // default empty
 	vector<CMovingItem> m_ghosts;  // ghost vector
 	bool m_DonkeyIsDead = false;
 	int m_nBarrels = MAX_NUM_BARRELS;
+	int m_score{};
 	bool m_IsColored = true;
 	bool m_IsHammer = false;
 	bool m_IsHammerActive = false;
+	CColorPoint::c_color m_HammerEntityColor = CColorPoint::BLUE;
 	CFile m_file;
 	CMovingItem m_mario;
 	CItem m_donkeykong;
@@ -117,6 +121,7 @@ private:
 	CBoard m_board;
 	ScreenData m_data;
 	CPoint m_Legend;
+	
 };
 
 

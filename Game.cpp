@@ -17,9 +17,10 @@ using namespace std;
 void CGame::Start()
 {
 	char board[BORDER_HIGHT - 2][BORDER_WIDTH - 2] = {};
+	int ind{};
 	while (true) {
 		PrintMenu();
-		CGame::MenuDecision decision = GetMenuDecision(board);
+		CGame::MenuDecision decision = GetMenuDecision(board, ind); // send ind and return
 		if (decision== GAME_END)
 		{
 			PrintGoodbye();
@@ -27,9 +28,9 @@ void CGame::Start()
 		}
 		clrscr();
 		StartGame(board);
-		PlayLoop();
+		LevelSelector(ind, board);
 	}
-}
+} //// 
 
 void CGame::PrintMenu()
 {
@@ -49,7 +50,7 @@ void CGame::PrintMenu()
 	CColoredPrint::prl("9 - exit", CColorPoint::c_color::GREEN, CColorPoint::c_decoration::ITALIC);
 }
 
-CGame::MenuDecision CGame::GetMenuDecision(char board[][BORDER_WIDTH - 2])
+CGame::MenuDecision CGame::GetMenuDecision(char board[][BORDER_WIDTH - 2], int &ind)
 {
 	char choice;
 
@@ -64,8 +65,7 @@ CGame::MenuDecision CGame::GetMenuDecision(char board[][BORDER_WIDTH - 2])
 		 case '1':
 			 if (!DecipherScreen(board))
 			 {
-				// m_board = {}; // clear board;
-				 cout << "The file: " << m_FileName << "contains an illegal char inside, make sure it's correct" <<" or a file wan't loaded" << endl;
+				 cout << "The file: " << m_FileName << " contains an illegal char inside, make sure it's correct" <<" or a file wan't loaded" << endl;
 				 break;
 			 }
 			 return GAME_START;
@@ -74,7 +74,7 @@ CGame::MenuDecision CGame::GetMenuDecision(char board[][BORDER_WIDTH - 2])
 			 PrintMenu();
 			 break;
 		 case '3':
-			 ChooseLevel(board);
+			 ChooseLevel(board ,ind);
 			 break;
 		 case '8':
 			 PrintInstructions(MAIN_MENU);
@@ -161,22 +161,22 @@ void CGame::Init(char board[][BORDER_WIDTH - 2])
 }
 
 
-void CGame::ChooseLevel(char board[][BORDER_WIDTH - 2])
+void CGame::ChooseLevel(char board[][BORDER_WIDTH - 2] ,int &ind)
 {
 	vector<string> screen;
 	CFile fileManager;
 	char input;
 	int instance = 0, Amount_of_Files_on_screen = 9;
 	int option;
-	vector<string> FileNames  = ReadDirectory();
-	int len = (int)FileNames.size();
+	ReadDirectory();
+	int len = (int)m_FileNames.size();
 	int Pages = (len / Amount_of_Files_on_screen) + 1;
 	clrscr();
 	hideCursor();
-	sort(FileNames.begin(), FileNames.end()); // stl sort
-	if (!FileNames.empty())
+	sort(m_FileNames.begin(), m_FileNames.end()); // stl sort
+	if (!m_FileNames.empty())
 	{
-		PrintChooseLevel(FileNames, instance, len, Amount_of_Files_on_screen); //color
+		PrintChooseLevel(m_FileNames, instance, len, Amount_of_Files_on_screen); //color
 		while (true)
 		{
 			if (_kbhit())
@@ -197,7 +197,8 @@ void CGame::ChooseLevel(char board[][BORDER_WIDTH - 2])
 							instance--;
 						break;
 					default:
-						m_FileName = FileNames[option + instance*Amount_of_Files_on_screen - 1];
+						ind = option + instance * Amount_of_Files_on_screen - 1;
+						m_FileName = m_FileNames[ind];
 						if (OpenFile(fileManager))
 							return;
 						break;
@@ -346,9 +347,8 @@ bool CGame::DecipherScreen(char board[][BORDER_WIDTH - 2])
 			
 }
 
-vector<string> CGame::ReadDirectory()
+void CGame::ReadDirectory()
 {
-	vector<string> Names;
 	regex pattern("dkong_[a-zA-Z0-9]+\\.screen");  // Only letters and numbers between dkong_ and .screen
 
 	try {
@@ -358,13 +358,13 @@ vector<string> CGame::ReadDirectory()
 
 			// Check if filename matches our pattern
 			if (regex_match(filenameStr, pattern))
-				Names.push_back(filenameStr);
+				m_FileNames.push_back(filenameStr);
 		}
 	}
 	catch (const fs::filesystem_error& e) {
 		cout << "Filesystem error: " << e.what() << endl;
 	}
-	return Names;
+	return ;
 }
 
 bool CGame::NecessaryItemExicst()
@@ -441,9 +441,9 @@ void CGame::ChangeAllEntitysColor()
 		BarrelColor = CColorPoint::RED;
 	}
 
-	for (auto ghost : m_ghosts)
+	for (auto& ghost : m_ghosts)
 		ghost.ChangeColor(GhostColor);
-	for (auto barrel : m_barrels)
+	for (auto& barrel : m_barrels)
 		barrel.ChangeColor(BarrelColor);
 }
 
@@ -451,16 +451,17 @@ void CGame::ResetMovingItems()
 {
 	ResetPlayer();
 	clrscr();
-	for (auto ghost : m_ghosts)
+	for (auto& ghost : m_ghosts)
 	{
 		ghost.SetX(ghost.GetXSpawn());
 		ghost.SetY(ghost.GetYSpawn());
 	}
+	ChangeAllEntitysColor();
 	m_barrels.clear();
 	
 }
 
-void CGame::PlayLoop()
+CGame::MenuDecision CGame::PlayLoop()
 {
 	bool Mario(true), Italian(true);
 	bool OnLadder(false);
@@ -478,6 +479,9 @@ void CGame::PlayLoop()
 		{
 			input = _getch();
 			{
+				CMovingItem::Directions PrevDir = m_mario.GetDirection();
+				if (PrevDir == CMovingItem::LEFT || PrevDir == CMovingItem::RIGHT)
+					m_mario.SetPrevDirection(PrevDir);
 				switch (input)
 				{
 				case 'a':
@@ -503,42 +507,46 @@ void CGame::PlayLoop()
 				case ESC_KEY:
 				{
 					if (Paused() == GAME_END)
-						return;
+						return GAME_END;
 					break;
 				}
+				case 'p':
+				case 'P':
+					if (m_IsHammerActive)
+						UseHammer();
+					break;
 				default:
 					// ignore illegal input
 					break;
 				}
 			}
 		}
-		if (cnt % BARREL_FREQUENCY_BIRTH == 0) {
+		if (cnt % BARREL_FREQUENCY_BIRTH == 0 && !m_DonkeyIsDead) { // stop spawning new barrels if donkey is dead;
 			if (AddBarrel() == DEAD) {
 				if (GameOver() == false) // game finished
-					return;
+					return GAME_END;
 			}
 		}
 
 		if (BarrelsMoving() == DEAD) {
 			if (GameOver() == false) // game finished
-				return;
+				return GAME_END;
 		}
 
 		if (GhostsMoving() == DEAD)
 		{
 			if (GameOver() == false) // game finished
-				return;
+				return GAME_END;
 		}
 
 		switch(PlayerCheckNextCell(m_mario))
 		{
 		case DEAD:
 			if (GameOver() == false) // game finished
-				return;
+				return GAME_END;
 			break;
-		case WON:
-			PrintCongratulation();
-			return;
+		case WON: /// allow to move to the next available level;
+			return GAME_START;
 		case ALIVE:
 			break;
 		} 
@@ -603,6 +611,38 @@ CGame::MenuDecision CGame::Paused()
 		}
 	}
 	return GAME_START;
+}
+
+void CGame::LevelSelector(int& ind, char board[][BORDER_WIDTH - 2])
+{
+	CFile fileManager;
+	int AmountOfFiles = m_FileNames.size() - 1;
+	bool flag = true;
+
+	while (flag)
+	{
+		if (PlayLoop() == GAME_END)
+			return;
+		if(ind == AmountOfFiles) //reached the final stage
+			flag = false;
+		while (ind < AmountOfFiles)
+		{
+			ind++;
+			m_FileName = m_FileNames[ind];
+			if (!OpenFile(fileManager) || !DecipherScreen(board)) // first openfile called and the decipher
+			{
+				continue; 
+			}
+			else
+			{
+				clrscr();
+				StartGame(board); // hey i am the problem it me; stack overflow!!!
+				break;
+
+			}
+		}
+	}
+	PrintCongratulation();
 }
 
 void CGame::PrintPauseMenu() 
@@ -706,6 +746,52 @@ void CGame::GhostCollision(CMovingItem& ghost)
 	}
 }
 
+void CGame::UseHammer()
+{
+	CPoint HammerPos;
+	CMovingItem::Directions direction = m_mario.GetDirection();
+	if (direction == CMovingItem::LEFT || direction == CMovingItem::RIGHT)
+		HammerPos = CPoint(m_mario.GetX() + m_mario.GetXDirection(), m_mario.GetY());
+	else
+	{
+		int XDir = m_mario.GetPrevDirection() == direction == CMovingItem::RIGHT ? 1 : -1;
+		HammerPos = CPoint(m_mario.GetX() + XDir, m_mario.GetY());
+	}
+
+	// Check and remove ghosts
+	auto ghostIt = m_ghosts.begin();
+	while (ghostIt != m_ghosts.end()) {
+		if (HammerPos.Compare(*ghostIt)) 
+		{
+			EraseCharacter(*ghostIt);
+			ghostIt = m_ghosts.erase(ghostIt);
+			m_score += GHOST_HIT;
+		}
+		else {
+			++ghostIt;
+		}
+	}
+
+	// Check and remove barrels
+	auto barrelIt = m_barrels.begin();
+	while (barrelIt != m_barrels.end()) {
+		if (HammerPos.Compare(*barrelIt)) 
+		{
+			EraseCharacter(*barrelIt);
+			barrelIt = m_barrels.erase(barrelIt);
+			m_score += BARREL_HIT;
+		}
+		else {
+			++barrelIt;
+		}
+	}
+	if (HammerPos.Compare(m_donkeykong))
+	{
+		m_donkeykong.ChangeColor(m_IsColored ? CColorPoint::RED : CColorPoint::BLACK);
+		m_DonkeyIsDead = true;
+		m_score += DONKEY_KONG_HIT;
+	}
+}
 CGame::LiveStatus CGame::GhostMoving(CMovingItem& ghost)
 {
 	if (IsHitPlayer(ghost))
@@ -897,8 +983,13 @@ CGame::LiveStatus CGame::AddBarrel()
 		prevDirection = CMovingItem::LEFT;
 		direction = CMovingItem::RIGHT;
 	}
+	CColorPoint::c_color barrel_color;
+	if (m_IsHammerActive) // if barrels are spanwed when the hammer is active they will be created in the correct color
+		barrel_color = m_HammerEntityColor;
+	else
+		barrel_color = CColorPoint::c_color::MAGENTA;
 
-	CMovingItem barrel = CMovingItem (x, m_donkeykong.GetY(), AVATAR_BARREL, m_IsColored ? CColorPoint::c_color::MAGENTA : CColorPoint::c_color::WHITE, MAX_FALL_BARREL);
+	CMovingItem barrel = CMovingItem (x, m_donkeykong.GetY(), AVATAR_BARREL, m_IsColored ? barrel_color : CColorPoint::c_color::WHITE, MAX_FALL_BARREL);
 	barrel.SetPrevDirection(prevDirection);
 
 	CPoint downPos(barrel.GetX(), barrel.GetY() + 1);
@@ -982,9 +1073,11 @@ CGame::LiveStatus CGame::MovePlayer(CMovingItem& character, CPoint& newPos)
 		return WON;
 	case HAMMER:
 		m_IsHammerActive = true;
+		m_IsHammer = false;
 		EraseCharacter(m_hammer);
 		character.HammerActivated(AVATAR_MARIO_WITH_HAMMER);
-		ChangeAllEntitysColor();
+		if(m_IsColored)
+			ChangeAllEntitysColor(); // color feature only
 		EraseCharacter(character);
 	}
 
@@ -1141,10 +1234,10 @@ void CGame::PrintCongratulation()
 
 bool CGame::GameOver()
 {
-	CharacterDeathAnimation(m_mario);
-	ResetMovingItems();
 	m_IsHammer = false; // a hammer is avaliable only on the first try
 	m_IsHammerActive = false;
+	CharacterDeathAnimation(m_mario);
+	ResetMovingItems();
 	
 	if (m_mario.GetLives() == 0) {
     	GameOverScreen();
