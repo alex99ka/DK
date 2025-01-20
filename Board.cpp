@@ -6,20 +6,6 @@ void CBoard::Init(bool isColored, char board[][BORDER_WIDTH - 2])
 {
 	int i;
 	m_IsColored = isColored;
-	//{
-	//	for (int y = 0; y < BORDER_HIGHT - 2; y++)
-	//	{
-	//		for (int x = 0; x < BORDER_WIDTH - 2; x++)
-	//		{
-	//			DrawOneChar(board[y][x]);
-	//		}
-	//		cout << endl;
-	//	}
-	//}
-
-	//cout << '\n';
-
-
 	*this = board;
 	// filling the workBoard with Q around it incase the 
 	for (i = 0; i < BORDER_HIGHT; i++)
@@ -35,22 +21,8 @@ void CBoard::Init(bool isColored, char board[][BORDER_WIDTH - 2])
 
 }
 
-void CBoard::Draw()
+void CBoard::Draw() const
 {
-	/// debug 
-	/*if (m_IsColored)
-	{
-		for (int y = 0; y < BORDER_HIGHT; y++)
-		{
-			for (int x = 0; x < BORDER_WIDTH; x++)
-			{
-				DrawOneChar(workBoard[y][x]);
-			}
-			cout << y << endl;
-		}
-	}
-	cout << endl;*/
-
 
 	if (m_IsColored)
 	{
@@ -60,11 +32,7 @@ void CBoard::Draw()
 			{
 				DrawOneChar(PrintBoard[y][x]);
 			}
-			/*for (int x = 0; x < BORDER_WIDTH; x++)
-			{
-				DrawOneChar(workBoard[y][x]);
-			}*/
-			cout << y <<endl;
+			cout << y <<endl; //DEBUG
 		}
 	}
 	else
@@ -75,14 +43,14 @@ void CBoard::Draw()
 			{
 				cout << PrintBoard[y][x];
 			}
-			cout << y << endl;
+			cout << y << endl; //DEBUG
 		}
 	}
 
 
 }
 
-void CBoard::DrawOneChar(char ch)
+void CBoard::DrawOneChar(char ch) const
 {
 	if (ch == BOARDER_SYMB)
 		CColoredPrint::pr(ch, BoarderColor, CColoredPrint::c_decoration::BOLD);
@@ -97,7 +65,7 @@ void CBoard::DrawOneChar(char ch)
 }
 
 
-bool CBoard::ValidatePoint(CPoint& const point)
+bool CBoard::ValidatePoint(CPoint& const point) const
 {
 	if (point.GetX() >= 0 && point.GetX() < BORDER_WIDTH &&
 		point.GetY() >= 0 && point.GetY() < BORDER_HIGHT)
@@ -106,7 +74,7 @@ bool CBoard::ValidatePoint(CPoint& const point)
 	return false;
 }
 
-enum CBoard::Board_Place CBoard::GetBoardPlace(CPoint& const point)
+enum CBoard::Board_Place CBoard::GetBoardPlace(CPoint& const point) const
 {
 	int y = point.GetY() + 1; // the one is there because workBoard is a bit bigger thus the offset
 	int x = point.GetX() + 1;
@@ -127,7 +95,7 @@ enum CBoard::Board_Place CBoard::GetBoardPlace(CPoint& const point)
 	return FREE;
 }
 
-CColorPoint::c_color CBoard::GetCharColor(char ch)
+CColorPoint::c_color CBoard::GetCharColor(char ch) const
 {
 	switch (ch)
 	{
@@ -145,7 +113,7 @@ CColorPoint::c_color CBoard::GetCharColor(char ch)
 }
 
 // a function that helps to reprint to the og board after somthing runs over it 
-bool CBoard::GetBoardSymbol(CPoint& coord, char* symbol, CColorPoint::c_color* color)
+bool CBoard::GetBoardSymbol(CPoint& coord, char* symbol, CColorPoint::c_color* color) const
 {
 	if (ValidatePoint(coord) == false)
 		return false;
@@ -158,7 +126,3 @@ bool CBoard::GetBoardSymbol(CPoint& coord, char* symbol, CColorPoint::c_color* c
 	return true;
 }
 
-void CBoard::UpdateworkBoard(int x, int y, char symbol)
-{
-	workBoard[y][x] = symbol;
-}

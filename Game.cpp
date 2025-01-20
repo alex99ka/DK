@@ -30,16 +30,15 @@ void CGame::Start()
 		StartGame(board);
 		LevelSelector(ind, board);
 	}
-} //// 
+}
 
-void CGame::PrintMenu()
+void CGame::PrintMenu() const
 {
 	clrscr();
 
 	CColoredPrint::prl("Hello, guy!\n");
 	CColoredPrint::prl("Welcome to Donkey Kong game\n", CColorPoint::c_color::BLUE, CColorPoint::c_decoration::BOLD);
 	CColoredPrint::prl("Please select one of the follwing options : ", CColorPoint::c_color::CYAN, CColorPoint::c_decoration::BOLD);
-	// add print for choose level on 3
 	CColoredPrint::prl("1 - Start a new game", CColorPoint::c_color::GREEN, CColorPoint::c_decoration::ITALIC);
 	if (m_IsColored)
 		CColoredPrint::prl("2 - Turn off color", CColorPoint::c_color::GREEN, CColorPoint::c_decoration::ITALIC);
@@ -54,7 +53,6 @@ CGame::MenuDecision CGame::GetMenuDecision(char board[][BORDER_WIDTH - 2], int &
 {
 	char choice;
 
-
 	while (true)
 	{
 		if (_kbhit())
@@ -65,7 +63,7 @@ CGame::MenuDecision CGame::GetMenuDecision(char board[][BORDER_WIDTH - 2], int &
 		 case '1':
 			 if (!DecipherScreen(board))
 			 {
-				 cout << "The file: " << m_FileName << " contains an illegal char inside, make sure it's correct" <<" or a file wan't loaded" << endl;
+				 cout << "The file: " << m_FileName << " didn't load properly or contains and illegal character inside"<< endl;
 				 break;
 			 }
 			 return GAME_START;
@@ -83,14 +81,14 @@ CGame::MenuDecision CGame::GetMenuDecision(char board[][BORDER_WIDTH - 2], int &
 			 return CGame::GAME_END;
 	
 			default:
-				cout << "your choice is not legal input"<< endl;
+				cout << "please choose either 1, 2, 3, 8 or 9"<< endl;
 		 }
 		}
 	}
 	return GAME_END;
 }
 
-void CGame::PrintInstructions(ScreenType type)
+void CGame::PrintInstructions(ScreenType type) const
 {
 	clrscr();
 	CColoredPrint::prl("\nGame instructions and keys\n", m_IsColored ? CColoredPrint::c_color::YELLOW : CColoredPrint::c_color::WHITE);
@@ -137,7 +135,7 @@ void CGame::PrintInstructions(ScreenType type)
 	}
 }
 
-void CGame::PrintGoodbye()
+void CGame::PrintGoodbye() const
 {
 	clrscr();
 	CColoredPrint::prl("Goodbye, friend!\n", CColoredPrint::c_color::CYAN);
@@ -154,6 +152,8 @@ void CGame::Init(char board[][BORDER_WIDTH - 2])
 {
 	m_board.Init(m_IsColored, board); // should get board.
 	ResetMovingItems();
+	if (m_IsColored == false)
+		TurnOffColor();
 	m_mario.SetLives(MARIO_LIVES);
 //	m_DonkeyIsDead = false;
 	m_nBarrels = MAX_NUM_BARRELS;
@@ -209,7 +209,7 @@ void CGame::ChooseLevel(char board[][BORDER_WIDTH - 2] ,int &ind)
 		}
 	}
 }
-void CGame::PrintChooseLevel(vector<string> FileNames, int instance, int len, int Amount_of_Files_on_screen)
+void CGame::PrintChooseLevel(vector<string> FileNames, int instance, int len, int Amount_of_Files_on_screen) const
 {
 	int startIndex = instance * Amount_of_Files_on_screen;
 	int filesToShow = min(Amount_of_Files_on_screen, len - startIndex); //to prevent overflow
@@ -234,7 +234,7 @@ bool CGame::OpenFile(CFile& fileManager)
 	return true;
 }
 
-int CGame::LegalButton(char input, int instance, int len, int Amount_of_Files_on_screen)
+int CGame::LegalButton(char input, int instance, int len, int Amount_of_Files_on_screen) const
 {
 	int num;
 	int filesInCurrentInstance;
@@ -280,8 +280,7 @@ bool CGame::DecipherScreen(char board[][BORDER_WIDTH - 2])
 
 			switch (symbol) {
 			case AVATAR_MARIO:
-				m_mario = CMovingItem(j, i, AVATAR_MARIO, // the + 1 is for the offset cause by rpint board
-					m_IsColored ? CColorPoint::GREEN : CColorPoint::WHITE);
+				m_mario = CMovingItem(j, i, AVATAR_MARIO, CColorPoint::GREEN);
 				board[i][j] = SPACE_SYMB;
 				break;
 
@@ -290,21 +289,18 @@ bool CGame::DecipherScreen(char board[][BORDER_WIDTH - 2])
 				if (hammer_counter != 0)
 					return false;
 				hammer_counter++;
-				m_hammer = CItem(j, i, HAMMER_SYMB,
-					m_IsColored ? CColorPoint::GREEN : CColorPoint::WHITE);
+				m_hammer = CItem(j, i, HAMMER_SYMB, CColorPoint::GREEN );
 				m_IsHammer = true; //  indicate that the hammer should be printed 
 				board[i][j] = SPACE_SYMB;
 				break;
 
 			case AVATAR_PRINCESS:
-				m_princess = CItem(j, i, AVATAR_PRINCESS,
-					m_IsColored ? CColorPoint::MAGENTA : CColorPoint::WHITE);
+				m_princess = CItem(j, i, AVATAR_PRINCESS, CColorPoint::MAGENTA);
 				board[i][j] = SPACE_SYMB;
 				break;
 
 			case AVATAR_DONKEYKONG:
-				m_donkeykong = CItem(j, i, AVATAR_DONKEYKONG,
-					m_IsColored ? CColorPoint::CYAN : CColorPoint::WHITE);
+				m_donkeykong = CItem(j, i, AVATAR_DONKEYKONG, CColorPoint::CYAN);
 				board[i][j] = SPACE_SYMB;
 				break;
 
@@ -364,10 +360,10 @@ void CGame::ReadDirectory()
 	catch (const fs::filesystem_error& e) {
 		cout << "Filesystem error: " << e.what() << endl;
 	}
-	return ;
+	return;
 }
 
-bool CGame::NecessaryItemExicst()
+bool CGame::NecessaryItemExicst() const
 {
 	// First check if items exist
 	if (m_mario == CMovingItem())
@@ -413,6 +409,14 @@ bool CGame::NecessaryItemExicst()
 		return false;
 
 	return true;
+}
+void CGame::TurnOffColor()
+{
+	m_mario.SetColor(CColorPoint::WHITE);
+	m_princess.SetColor(CColorPoint::WHITE);
+	m_donkeykong.SetColor(CColorPoint::WHITE);
+	m_hammer.SetColor(CColorPoint::WHITE);
+	
 }
 // called upon after a death, returns mario to spawn point
 void CGame::ResetPlayer()
@@ -554,17 +558,17 @@ CGame::MenuDecision CGame::PlayLoop()
 			m_hammer.Draw();
 		m_donkeykong.Draw();
 		m_princess.Draw();
-		DrawHearts();
+		DisplayLegend();
 		std::cout.flush(); 
 		Sleep(SLEEP_TIME);
 	}
+	return GAME_START; // the code will never reach hear but it's here to shut the error
 }
 void CGame::ResetScreen()
 {
 	clrscr();
 	m_board.Draw();
 	m_donkeykong.Draw();
-	DrawHearts();
 	if (m_DonkeyIsDead)
 		m_princess.Draw();
 	m_mario.Draw();
@@ -574,7 +578,7 @@ void CGame::ResetScreen()
 	}
 }
 // triggerd by the esc button
-CGame::MenuDecision CGame::Paused()
+CGame::MenuDecision CGame::Paused() 
 {
 	char choice, prevchioce= '\0';
 
@@ -616,7 +620,7 @@ CGame::MenuDecision CGame::Paused()
 void CGame::LevelSelector(int& ind, char board[][BORDER_WIDTH - 2])
 {
 	CFile fileManager;
-	int AmountOfFiles = m_FileNames.size() - 1;
+	int AmountOfFiles =(int) m_FileNames.size() - 1;
 	bool flag = true;
 
 	while (flag)
@@ -645,7 +649,7 @@ void CGame::LevelSelector(int& ind, char board[][BORDER_WIDTH - 2])
 	PrintCongratulation();
 }
 
-void CGame::PrintPauseMenu() 
+void CGame::PrintPauseMenu() const
 {
 	const char* PauseMenu[] = {
 		"********************************************************************************",
@@ -678,9 +682,8 @@ CGame::LiveStatus CGame::ExplosionBarrel(CMovingItem& barrel)
 	CPoint explPos;
 	int minX = std::max(barrel.GetX() , 1);
 	int minY = std::max(barrel.GetY() , 1);
-	int maxX = std::min(barrel.GetX() + 1, m_board.GetBorderWidth() - 1);
-    int maxY = std::min(barrel.GetY() + 1, m_board.GetBorderHight() - 1);
-
+	int maxX = std::min(barrel.GetX() + 1, BORDER_WIDTH - 1);
+    int maxY = std::min(barrel.GetY() + 1, BORDER_HIGHT - 1);
 
 	for (int y = minY; y <= maxY; y++) {
 		for (int x = minX; x <= maxX; x++)
@@ -692,7 +695,7 @@ CGame::LiveStatus CGame::ExplosionBarrel(CMovingItem& barrel)
 			CColoredPrint::pr(EXPL_SYMB, m_IsColored ? CColorPoint::c_color::RED : CColorPoint::c_color::WHITE, m_IsColored ? CColoredPrint::c_decoration::BLINK : CColoredPrint::c_decoration::NORMAL);
 		}
 	}
-	Sleep(500);
+	Sleep(EXPLOSION_TIME);
 	if (status != DEAD)
 	{
 		char symbol;
@@ -712,12 +715,7 @@ CGame::LiveStatus CGame::ExplosionBarrel(CMovingItem& barrel)
 
 	return status;
 }
-
-bool CGame::IsHitPlayer(CPoint& Entity)
-{
-	return (Entity == m_mario);
-}
-
+// move all the ghost, shift them and check if the killed mario
 CGame::LiveStatus CGame::GhostsMoving()
 {
 	CGame::LiveStatus status;
@@ -729,10 +727,9 @@ CGame::LiveStatus CGame::GhostsMoving()
 	}
 	return ALIVE;
 }
-
+// ghost switch direction if they hit each other
 void CGame::GhostCollision(CMovingItem& ghost)
 {
-
 	for (auto& t_ghost : m_ghosts)
 	{
 		// Skip if it's the same object 
@@ -750,22 +747,23 @@ void CGame::UseHammer()
 {
 	CPoint HammerPos;
 	CMovingItem::Directions direction = m_mario.GetDirection();
+
 	if (direction == CMovingItem::LEFT || direction == CMovingItem::RIGHT)
 		HammerPos = CPoint(m_mario.GetX() + m_mario.GetXDirection(), m_mario.GetY());
 	else
 	{
-		int XDir = m_mario.GetPrevDirection() == direction == CMovingItem::RIGHT ? 1 : -1;
+		int XDir = m_mario.GetPrevDirection() == direction == CMovingItem::RIGHT ? 1 : -1; //ternary operator that implaments movement right and left
 		HammerPos = CPoint(m_mario.GetX() + XDir, m_mario.GetY());
 	}
 
 	// Check and remove ghosts
-	auto ghostIt = m_ghosts.begin();
+	auto ghostIt = m_ghosts.begin(); // vector iteration
 	while (ghostIt != m_ghosts.end()) {
 		if (HammerPos.Compare(*ghostIt)) 
 		{
 			EraseCharacter(*ghostIt);
 			ghostIt = m_ghosts.erase(ghostIt);
-			m_score += GHOST_HIT;
+			m_score += GHOST_HIT; //reciving points for killing a ghost
 		}
 		else {
 			++ghostIt;
@@ -779,7 +777,7 @@ void CGame::UseHammer()
 		{
 			EraseCharacter(*barrelIt);
 			barrelIt = m_barrels.erase(barrelIt);
-			m_score += BARREL_HIT;
+			m_score += BARREL_HIT; // reciving point for destroying a barrel
 		}
 		else {
 			++barrelIt;
@@ -791,6 +789,18 @@ void CGame::UseHammer()
 		m_DonkeyIsDead = true;
 		m_score += DONKEY_KONG_HIT;
 	}
+}
+void CGame::DisplayLegend() const
+{
+	int x, y;
+	x = m_Legend.GetX();
+	y = m_Legend.GetY();
+	GoToXY(x, y);
+	DrawHearts();
+	GoToXY(x, ++y);
+	CColoredPrint::prl("My Score:", m_IsColored? CColorPoint::CYAN : CColorPoint:: WHITE);
+	GoToXY(x, ++y);
+	cout << m_score;
 }
 CGame::LiveStatus CGame::GhostMoving(CMovingItem& ghost)
 {
@@ -821,47 +831,13 @@ CGame::LiveStatus CGame::GhostMoving(CMovingItem& ghost)
 	ghost.SetCoord(newPos.GetX(), newPos.GetY());
 	ghost.Draw(); 
 	return ALIVE;
-	
-	/*switch (nextPlace) {
-	case CBoard::Board_Place::FLOOR:
-	case CBoard::Board_Place::BOARDER:
-		SwitchGhostDirection(ghost);
-		return ALIVE;
-		if (BarrelFlowCollision(ghost, ghost.GetPrevDirection(), newPos))
-			return CGame::ExplosionBarrel(ghost);
-		break;
-	case CBoard::Board_Place::FREE:
-	{
-		CPoint downPos(newPos.GetX(), newPos.GetY() + 1);
-		enum CBoard::Board_Place downPlace = m_board.GetBoardPlace(downPos);
-		if (direction == CMovingItem::RIGHT || direction == CMovingItem::LEFT) {
-			ghost.SetPrevDirection(ghost.GetDirection());
-			if (downPlace == CBoard::Board_Place::ARROW_LEFT) {
-				ghost.SetDirection(CMovingItem::LEFT);
-				newPos.SetCoord(ghost.GetX() + ghost.GetXDirection(), ghost.GetY());
-			}
-			else if (downPlace == CBoard::Board_Place::ARROW_RIGHT) {
-				ghost.SetDirection(CMovingItem::RIGHT);
-				newPos.SetCoord(ghost.GetX() + ghost.GetXDirection(), ghost.GetY());
-			}
-			else if (downPlace == CBoard::Board_Place::LADDER)
-				ghost.SetDirection(CMovingItem::DOWN);
-		}
-		if (downPlace == CBoard::Board_Place::FREE)
-			FallCharacter(ghost);
-	}
-	break;
-		break;
-	}
-
-	*/
-
 }
 
 CGame::LiveStatus CGame::SwitchGhostDirection(CMovingItem& ghost)
 {
 	enum CMovingItem::Directions dir;
 	dir = ghost.GetDirection(); 
+
 	if (dir == CMovingItem::Directions::LEFT)
 		ghost.SetDirection(CMovingItem::Directions::RIGHT);
 	else
@@ -876,7 +852,7 @@ CGame::LiveStatus CGame::SwitchGhostDirection(CMovingItem& ghost)
 void CGame::ResetBarrel(CMovingItem& barrel)
 {
 	EraseCharacter(barrel);
-	auto it = std::find(m_barrels.begin(), m_barrels.end(), barrel);
+	auto it = find(m_barrels.begin(), m_barrels.end(), barrel);
 	m_barrels.erase(it);
 	m_nBarrels++;
 }
@@ -898,13 +874,13 @@ CGame::LiveStatus  CGame::BarrelMoving(CMovingItem& barrel)
 		ResetBarrel(barrel);
 		return DEAD;
 	}
-		
+
 	CPoint newPos = CPoint(barrel.GetX() + barrel.GetXDirection(), barrel.GetY() + barrel.GetYDirection());
 
 	enum CBoard::Board_Place place = m_board.GetBoardPlace(barrel);
 	enum CBoard::Board_Place nextPlace = m_board.GetBoardPlace(newPos);
 	CMovingItem::Directions direction = barrel.GetDirection();
-	
+
 	switch (nextPlace) {
 	case CBoard::Board_Place::BOARDER:
 		ResetBarrel(barrel);
@@ -917,12 +893,13 @@ CGame::LiveStatus  CGame::BarrelMoving(CMovingItem& barrel)
 		if (BarrelFlowCollision(barrel, CMovingItem::RIGHT, newPos))
 			return CGame::ExplosionBarrel(barrel);
 		break;
+	case CBoard::Board_Place::LADDER:
 	case CBoard::Board_Place::FLOOR:
 		if (BarrelFlowCollision(barrel, barrel.GetPrevDirection(), newPos))
 			return CGame::ExplosionBarrel(barrel);
 		break;
 	case CBoard::Board_Place::FREE:
-	{
+
 		CPoint downPos(newPos.GetX(), newPos.GetY() + 1);
 		enum CBoard::Board_Place downPlace = m_board.GetBoardPlace(downPos);
 		if (direction == CMovingItem::RIGHT || direction == CMovingItem::LEFT) {
@@ -934,21 +911,17 @@ CGame::LiveStatus  CGame::BarrelMoving(CMovingItem& barrel)
 			else if (downPlace == CBoard::Board_Place::ARROW_RIGHT) {
 				barrel.SetDirection(CMovingItem::RIGHT);
 				newPos.SetCoord(barrel.GetX() + barrel.GetXDirection(), barrel.GetY());
-			} /*else if (downPlace == CBoard::Board_Place::LADDER)
-				barrel.SetDirection(CMovingItem::DOWN);*/
+			}
+			if (downPlace == CBoard::Board_Place::FREE)
+				FallCharacter(barrel);
+			break;
 		}
-		if (downPlace == CBoard::Board_Place::FREE)
-			FallCharacter(barrel);
+
+		EraseCharacter(barrel);
+		barrel.SetCoord(newPos.GetX(), newPos.GetY());
+		barrel.Draw();
+		return ALIVE;
 	}
-	break;
-	case CBoard::Board_Place::LADDER:
-		break;
-	}
-	
-	EraseCharacter(barrel);
-	barrel.SetCoord(newPos.GetX(), newPos.GetY());
-	barrel.Draw();
-	return ALIVE;
 }
 
 CGame::LiveStatus CGame::BarrelsMoving() {
@@ -979,10 +952,11 @@ CGame::LiveStatus CGame::AddBarrel()
 		direction = CMovingItem::LEFT;
 	}
 	else {
-		x = getRandomInt(m_donkeykong.GetX() + 1, m_board.GetBorderWidth() - 2);
+		x = getRandomInt(m_donkeykong.GetX() + 1, BORDER_WIDTH - 2);
 		prevDirection = CMovingItem::LEFT;
 		direction = CMovingItem::RIGHT;
 	}
+
 	CColorPoint::c_color barrel_color;
 	if (m_IsHammerActive) // if barrels are spanwed when the hammer is active they will be created in the correct color
 		barrel_color = m_HammerEntityColor;
@@ -1023,13 +997,13 @@ bool CGame::IsInBounds(int i, int j) const
 			j >= 0 && j < BORDER_WIDTH;
 }
 
-CGame::NeighboorType CGame::WhoSomeoneNextToMe(CPoint& point)
+CGame::NeighboorType CGame::WhoSomeoneNextToMe(CPoint& point) const
 {
-	for (CMovingItem& barrel : m_barrels) {
+	for (CMovingItem barrel : m_barrels) { // using lvalue so it can be a const
 		if (barrel.Compare(point))
 			return BARREL;
 	}
-	for (CMovingItem& ghost : m_ghosts) {
+	for (CMovingItem ghost : m_ghosts) {
 		if (ghost.Compare(point))
 			return GHOST;
 	}
@@ -1094,7 +1068,7 @@ void CGame::FallCharacter(CMovingItem& character)
 	character.Falling();
 }
 // checks what in cell next to the direction of the player
-CGame::LiveStatus CGame::PlayerCheckNextCell(CMovingItem& character)
+CGame::LiveStatus CGame::PlayerCheckNextCell(CMovingItem& character) 
 {
 	enum CBoard::Board_Place place = m_board.GetBoardPlace(character);
 	CMovingItem::Directions direction = character.GetDirection();
@@ -1208,7 +1182,7 @@ CGame::LiveStatus CGame::PlayerCheckNextCell(CMovingItem& character)
 	return ALIVE;
 }
 
-void CGame::PrintCongratulation()
+void CGame::PrintCongratulation() const
 {
 	clrscr();
 
@@ -1248,7 +1222,7 @@ bool CGame::GameOver()
 	return true;
 }
 
-void CGame::GameOverScreen()
+void CGame::GameOverScreen() const
 {
 	// Clear the screen
 	clrscr();
@@ -1306,32 +1280,16 @@ void CGame::GameOverScreen()
 	}
 }
 
-void CGame::DrawHearts()
+void CGame::DrawHearts() const
 {
 	int i, lives;
 	lives = m_mario.GetLives();
-	GoToXY(3, 2);
 	for (i = 0; i < lives; i++)
 		CColoredPrint::pr("<3", m_IsColored ? CColoredPrint::c_color::RED : CColorPoint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
 }
 //// triggerd after donkey was deafeated
 
-// should be deleted 
-void CGame::CreatePrincess()
-{
-	int princessY = 3, princessX = 67;
-	int PlatforSize = 3;
-	m_princess = CItem(princessX, princessY, AVATAR_PRINCESS, m_IsColored ? CColorPoint::c_color::MAGENTA : CColorPoint::c_color::WHITE);
-	for (int i = -1; i < PlatforSize - 1; i++)
-	{
-		m_board.UpdateworkBoard(princessX + i, princessY + 1, FLOOR_SYMB);
-		GoToXY(princessX + i, princessY + 1);
-		CColoredPrint::pr(FLOOR_SYMB, m_IsColored ? CColorPoint::c_color::YELLOW : CColorPoint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
-	}
-	m_princess.Draw();
-}
-
-void CGame::DrawGhost()
+void CGame::DrawGhost() const
 {
 	for (auto ghost : m_ghosts)
 		ghost.Draw();
@@ -1343,7 +1301,7 @@ void CGame::CharacterDeathAnimation(CMovingItem& character)
 	int i, up = 2;
 	int x = character.GetX();
 	int y = character.GetY();
-	int BoarderHight = m_board.GetBorderHight();
+	int BoarderHight = BORDER_HIGHT;
 	Sleep(200);
 	for (i = 0; i < up; i++)
 	{

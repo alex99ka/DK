@@ -14,7 +14,7 @@ public:
 	void SetCoord(int X, int Y) { m_x = X;  m_y = Y;};
 	int GetX() const { return m_x; }
 	int GetY() const { return m_y; }
-	bool Compare(CPoint& other) { 
+	bool Compare(CPoint& other) const {
 		return (m_x == other.GetX() && m_y == other.GetY());
 	};
 
@@ -40,7 +40,7 @@ public:
 	
 	void Draw() { _draw(m_symbol, m_color); }
 	void Erase() { _draw(m_RestoreSymbol, m_RestoreColor); }
-	char GetNextSymbol() { return m_RestoreSymbol; }
+	char GetNextSymbol() const { return m_RestoreSymbol; }
 	void ChangeColor(CColorPoint::c_color NewColor) { m_color = NewColor; }
 
 private:
@@ -67,18 +67,18 @@ public:
 		m_prevDirection = STOP;
 	}
 
-	int GetXDirection() { return m_Xdirection; }
-	int GetYDirection()	{ return m_Ydirection; }
-	int GetXSpawn() { return m_Xspawn; }
-	int GetYSpawn() { return m_Yspawn; }
-	enum Directions GetDirection() { return m_direction; };
-	enum Directions GetPrevDirection() { return m_prevDirection; };
-	bool IsStop() { return (m_direction == STOP); }
+	int GetXDirection() const { return m_Xdirection; }
+	int GetYDirection()	const { return m_Ydirection; }
+	int GetXSpawn() const { return m_Xspawn; }
+	int GetYSpawn() const { return m_Yspawn; }
+	enum Directions GetDirection() const { return m_direction; };
+	enum Directions GetPrevDirection() const { return m_prevDirection; };
+	bool IsStop() const { return (m_direction == STOP); }
 	void SetPrevDirection(Directions direction) { m_prevDirection = direction; }
 	void SetDirection(Directions direction);
 	
 	void ReduceLife() { m_lives--; }
-	int GetLives() { return m_lives; }
+	int GetLives() const { return m_lives; }
 	void SetLives(int lives) { m_lives = lives; }
 
 	void Falling() { m_FallCounter++; }

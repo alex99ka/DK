@@ -5,9 +5,4 @@ C:\Users\alex9\source\repos\dk1\Board.h(62,39): warning C4227: anachronism used:
 C:\Users\alex9\source\repos\dk1\Board.h(82,27): warning C4227: anachronism used: qualifiers on reference are ignored
   (compiling source file '../Game.cpp')
   
-C:\Users\alex9\source\repos\dk1\Game.h(11,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  (compiling source file '../Game.cpp')
-  
-C:\Users\alex9\source\repos\dk1\Game.cpp(619,20): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\alex9\source\repos\dk1\Game.cpp(561,1): warning C4715: 'CGame::PlayLoop': not all control paths return a value
   Project1.vcxproj -> C:\Users\alex9\source\repos\dk1\Project1\x64\Debug\donkey_Kong.exe

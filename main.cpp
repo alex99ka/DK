@@ -1,8 +1,6 @@
 #include "Game.h"
 
 
-int main() {
-    CGame game;
-    game.Start();
-    return 0;
+void main() {
+    CGame().Start();
 }

@@ -8,7 +8,7 @@
 #include <regex>
 #include "Board.h"
 #include "Item.h"
-#include "string.h"(
+#include "string.h"
 #include "File.h"
 
 
@@ -45,6 +45,7 @@ private:
 	static constexpr char SPACE_SYMB = ' ';
 	static constexpr int NUM_OF_BARRELS = 7;
 	static constexpr int SLEEP_TIME = 100;
+	static constexpr int EXPLOSION_TIME = 200;
 	static constexpr int MAX_NUM_BARRELS = 10;
 	static constexpr int BARREL_FREQUENCY_BIRTH = 25;
 	static constexpr int MAX_FALL_BARREL = 8;
@@ -57,25 +58,24 @@ private:
 	MenuDecision PlayLoop();
 	void ResetScreen();
 	void ChooseLevel(char board[][BORDER_WIDTH - 2], int &ind);
-	void PrintChooseLevel(vector<string> FileNames, int instance, int len, int Amount_of_Files_on_screen);
+	void PrintChooseLevel(vector<string> FileNames, int instance, int len, int Amount_of_Files_on_screen) const;
 	bool OpenFile(CFile& fileManager);
-	int LegalButton(char input, int instance, int len, int Amount_of_Files_on_screen);
-	//bool ValidateChars();
+	int LegalButton(char input, int instance, int len, int Amount_of_Files_on_screen) const;
 	bool DecipherScreen(char board[][BORDER_WIDTH - 2]);
-	bool NecessaryItemExicst();
+	bool NecessaryItemExicst() const;
+	void TurnOffColor();
 
 	MenuDecision GetMenuDecision(char board[][BORDER_WIDTH - 2], int &ind);
-	void PrintMenu();
-	void PrintInstructions(ScreenType type);
-	void PrintGoodbye();
-	void PrintCongratulation();
-	void PrintPauseMenu();
-	bool GameOver();
-	void GameOverScreen();
+	void PrintMenu() const;
+	void PrintInstructions(ScreenType type) const;
+	void PrintGoodbye() const;
+	void PrintCongratulation() const;
+	void PrintPauseMenu() const;
+	void GameOverScreen() const;
 	void CharacterDeathAnimation(CMovingItem& character);
-	void DrawHearts();
-	void CreatePrincess();
-	void DrawGhost();
+	void DrawHearts() const;
+	void DrawGhost() const;
+	bool GameOver();
 	
 	LiveStatus AddBarrel();
 	LiveStatus BarrelMoving(CMovingItem& barrel);
@@ -85,14 +85,15 @@ private:
 	LiveStatus GhostMoving(CMovingItem& ghost);
 	LiveStatus SwitchGhostDirection(CMovingItem& ghost);
 	void ResetBarrel(CMovingItem& barrel);
-	bool IsHitPlayer(CPoint& barrel);
+	bool IsHitPlayer(CPoint& Entity) const {return (Entity == m_mario);};
 	bool BarrelFlowCollision(CMovingItem& barrel, CMovingItem::Directions direction, CPoint& newPos);
 	void GhostCollision(CMovingItem& ghost);
 	void UseHammer();
+	void DisplayLegend() const;
 
 	LiveStatus PlayerCheckNextCell(CMovingItem& character);
-	CGame::LiveStatus MovePlayer(CMovingItem& character, CPoint& newPos);
-	NeighboorType WhoSomeoneNextToMe(CPoint& point);
+	LiveStatus MovePlayer(CMovingItem& character, CPoint& newPos);
+	NeighboorType WhoSomeoneNextToMe(CPoint& point) const;
 	void FallCharacter(CMovingItem& character);
 	void ResetPlayer();
 	void ChangeAllEntitysColor();
@@ -119,9 +120,7 @@ private:
 	CItem m_hammer;
 	vector<CMovingItem> m_barrels;
 	CBoard m_board;
-	ScreenData m_data;
 	CPoint m_Legend;
-	
 };
 
 
