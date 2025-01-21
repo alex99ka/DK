@@ -112,6 +112,7 @@ private:
 	bool m_IsColored = true;
 	bool m_IsHammer = false;
 	bool m_IsHammerActive = false;
+	bool m_LevelWasChoosen = false;
 	CColorPoint::c_color m_HammerEntityColor = CColorPoint::BLUE;
 	CFile m_file;
 	CMovingItem m_mario;
@@ -121,6 +122,7 @@ private:
 	vector<CMovingItem> m_barrels;
 	CBoard m_board;
 	CPoint m_Legend;
+
 };
 
 

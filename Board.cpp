@@ -7,23 +7,21 @@ void CBoard::Init(bool isColored, char board[][BORDER_WIDTH - 2])
 	int i;
 	m_IsColored = isColored;
 	*this = board;
-	// filling the workBoard with Q around it incase the 
+	// filling the WorkBoard with Q around it incase the 
 	for (i = 0; i < BORDER_HIGHT; i++)
 	{
-		workBoard[i][0] = BOARDER_SYMB;
-		workBoard[i][BORDER_WIDTH-1] = BOARDER_SYMB;
+		WorkBoard[i][0] = BOARDER_SYMB;
+		WorkBoard[i][BORDER_WIDTH-1] = BOARDER_SYMB;
 	}
 	for ( i = 0; i < BORDER_WIDTH; i++)
 	{
-		workBoard[0][i] = BOARDER_SYMB;
-		workBoard[BORDER_HIGHT - 1][i] = FLOOR_SYMB; // allows barrels to work properly 
+		WorkBoard[0][i] = BOARDER_SYMB;
+		WorkBoard[BORDER_HIGHT - 1][i] = FLOOR_SYMB; // allows barrels to work properly 
 	}
-
 }
 
 void CBoard::Draw() const
 {
-
 	if (m_IsColored)
 	{
 		for (int y = 0; y < BORDER_HIGHT - 2; y++)
@@ -32,7 +30,7 @@ void CBoard::Draw() const
 			{
 				DrawOneChar(PrintBoard[y][x]);
 			}
-			cout << y <<endl; //DEBUG
+			cout <<endl; 
 		}
 	}
 	else
@@ -43,7 +41,7 @@ void CBoard::Draw() const
 			{
 				cout << PrintBoard[y][x];
 			}
-			cout << y << endl; //DEBUG
+			cout << endl; 
 		}
 	}
 
@@ -76,20 +74,20 @@ bool CBoard::ValidatePoint(CPoint& const point) const
 
 enum CBoard::Board_Place CBoard::GetBoardPlace(CPoint& const point) const
 {
-	int y = point.GetY() + 1; // the one is there because workBoard is a bit bigger thus the offset
+	int y = point.GetY() + 1; // the one is there because WorkBoard is a bit bigger thus the offset
 	int x = point.GetX() + 1;
 
 	if (ValidatePoint(point) == false)
 		return OUT_OB;
-	if (workBoard[y][x] == LADDER_SYMB)
+	if (WorkBoard[y][x] == LADDER_SYMB)
 		return LADDER;
-	if (workBoard[y][x] == BOARDER_SYMB)
+	if (WorkBoard[y][x] == BOARDER_SYMB)
 		return BOARDER;
-	if (workBoard[y][x] == FLOOR_SYMB)
+	if (WorkBoard[y][x] == FLOOR_SYMB)
 		return FLOOR;
-	if (workBoard[y][x] == MOVE_LEFT_SYMB)
+	if (WorkBoard[y][x] == MOVE_LEFT_SYMB)
 		return ARROW_LEFT;
-	if (workBoard[y][x] == MOVE_RIGHT_SYMB)
+	if (WorkBoard[y][x] == MOVE_RIGHT_SYMB)
 		return ARROW_RIGHT;
 
 	return FREE;

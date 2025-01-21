@@ -20,7 +20,7 @@ class CBoard
 	static constexpr CColorPoint::c_color ArrowColor = CColoredPrint::c_color::MAGENTA;
 	static constexpr CColorPoint::c_color LadderColor = CColoredPrint::c_color::BLUE;
 
-	int levels[SIZE_LEVEL_STOCK] = { 24,22,19,15,9,7,4 };
+	
 public:
 	enum Board_Place { BOARDER, FLOOR, LADDER, FREE, OUT_OB, ARROW_RIGHT, ARROW_LEFT };
 
@@ -35,12 +35,10 @@ public:
 		{
 			for (int j = 1, l = 0; j < BORDER_WIDTH -1;  l++ ,j++)
 			{
-				workBoard[i][j] = board[k][l];
+				WorkBoard[i][j] = board[k][l];
 				PrintBoard[k][l] = board[k][l];
 			}
-		}
-
-	
+		} 
 	}
 private:
 	//void RestoreBoard
@@ -49,7 +47,7 @@ private:
 	bool ValidatePoint(CPoint& const point) const;
 	CColorPoint::c_color GetCharColor(char ch) const;
 
-	char workBoard[BORDER_HIGHT][BORDER_WIDTH] = {};
+	char WorkBoard[BORDER_HIGHT][BORDER_WIDTH] = {};
 	char PrintBoard[BORDER_HIGHT-2][BORDER_WIDTH-2] = {};
 	bool m_IsColored = true;
 };
