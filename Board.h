@@ -31,9 +31,9 @@ public:
 	bool GetBoardSymbol(CPoint& coord, char* symbol, CColorPoint::c_color* color) const;
 	void operator=(const char board[][BORDER_WIDTH - 2])
 	{
-		for (int i = 1 , k = 0; i < BORDER_HIGHT - 1; k++, i++)
+		for (int i = 1 , k = 0; k < BORDER_HIGHT - 2; k++, i++)
 		{
-			for (int j = 1, l = 0; j < BORDER_WIDTH -1;  l++ ,j++)
+			for (int j = 1, l = 0; l < BORDER_WIDTH -2;  l++ ,j++)
 			{
 				WorkBoard[i][j] = board[k][l];
 				PrintBoard[k][l] = board[k][l];

@@ -21,6 +21,3 @@ bool CFile::OpenFile(const string& FileName, vector<string>& screen)
 }
 
 
-string CFile::GetLastError() const {
-    return lastError;
-}

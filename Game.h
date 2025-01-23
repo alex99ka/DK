@@ -22,12 +22,12 @@ private:
 	enum MenuDecision { GAME_START, GAME_END };
 	enum LiveStatus { DEAD, ALIVE, WON };
     enum ScreenType { MAIN_MENU, PAUSE_MENU };
-	enum ScorePoints {GHOST_HIT = 50, BARREL_HIT = 50, DONKEY_KONG_HIT = 150};
+	enum ScorePoints {GHOST_HIT = 50, BARREL_HIT = 50, DONKEY_KONG_HIT = 150, LIVES_BONUS = 75};
 	
 	static constexpr int ESC_KEY = 27;
 	static constexpr int MARIO_LIVES = 3;
-	static constexpr int PAGE_RIGHT = -1;
-	static constexpr int PAGE_LEFT = -2;
+	static constexpr char PAGE_RIGHT = '>';
+	static constexpr char PAGE_LEFT = '<';
 	static constexpr char AVATAR_MARIO = '@';
 	static constexpr char AVATAR_MARIO_WITH_HAMMER = 'M';
 	static constexpr char AVATAR_BARREL = 'O';
@@ -53,19 +53,19 @@ private:
 	void ReadDirectory();
 	MenuDecision Paused();
 	void LevelSelector(int& ind, char board[][BORDER_WIDTH - 2]);
-	void StartGame(char board[][BORDER_WIDTH - 2]);
+	void StartGame(char board[][BORDER_WIDTH - 2], int );
 	void Init(char board[][BORDER_WIDTH - 2]);
 	MenuDecision PlayLoop();
+	MenuDecision GetMenuDecision(char board[][BORDER_WIDTH - 2], int &ind);
 	void ResetScreen();
 	void ChooseLevel(char board[][BORDER_WIDTH - 2], int &ind);
-	void PrintChooseLevel(vector<string> FileNames, int instance, int len, int Amount_of_Files_on_screen) const;
+	void PrintChooseLevel(int instance, int len, int Amount_of_Files_on_screen) const;
 	bool OpenFile(CFile& fileManager);
-	int LegalButton(char input, int instance, int len, int Amount_of_Files_on_screen) const;
+	bool LegalButton(char& input, int instance, int len, int Amount_of_Files_on_screen) const;
 	bool DecipherScreen(char board[][BORDER_WIDTH - 2]);
 	bool NecessaryItemExicst() const;
 	void TurnOffColor();
 
-	MenuDecision GetMenuDecision(char board[][BORDER_WIDTH - 2], int &ind);
 	void PrintMenu() const;
 	void PrintInstructions(ScreenType type) const;
 	void PrintGoodbye() const;

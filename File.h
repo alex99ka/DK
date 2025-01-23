@@ -11,7 +11,8 @@ using namespace std;
 class CFile {
 public:
     bool OpenFile(const string& FileName, vector<string>& screen);
-    string GetLastError() const;
+    string GetLastError() const {return lastError;}
+
 private:
     string lastError;
 };

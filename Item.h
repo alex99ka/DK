@@ -21,23 +21,22 @@ public:
 	bool operator==(const CPoint& other) const {
 		return (m_x == other.GetX() && m_y == other.GetY());
 	}
-	
 };
 
 class CItem : public CPoint
 {
 public:
-	
+
 	CItem(int x = 0, int y = 0, char c = ' ', CColorPoint::c_color color = CColorPoint::c_color::WHITE)
-		: CPoint(x, y), m_symbol(c), m_color(color) { }
+		: CPoint(x, y), m_symbol(c), m_color(color) {
+	}
 
 	char GetSymbol() const { return m_symbol; }
 	void HammerActivated(char c) { m_symbol = c; SetColor(CColorPoint::BLUE); }
 	void SetRestoreSymbol(char ch, CColorPoint::c_color color) { m_RestoreSymbol = ch; m_RestoreColor = color; }
 	CColorPoint::c_color GetColor() const { return m_color; }
-	void SetColor(CColorPoint::c_color color) { m_color = m_color; }
+	void SetColor(CColorPoint::c_color color) { m_color = color; }
 	void Respawn(char avatar, CColorPoint::c_color color = CColorPoint::c_color::GREEN) { m_symbol = avatar, m_color = color; }
-	
 	void Draw() { _draw(m_symbol, m_color); }
 	void Erase() { _draw(m_RestoreSymbol, m_RestoreColor); }
 	char GetNextSymbol() const { return m_RestoreSymbol; }
@@ -52,7 +51,7 @@ private:
 	void _draw(char ch, CColoredPrint::c_color color) {
 		GoToXY(m_x, m_y);
 		CColoredPrint::pr(ch, color, CColoredPrint::c_decoration::BOLD);
-	};
+	}
 };
 
 class CMovingItem : public CItem

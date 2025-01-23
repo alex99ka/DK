@@ -3,7 +3,6 @@
 #include <iostream>
 #include <random>
 
-
 void GoToXY(int x, int y);
 void hideCursor();
 void clrscr();

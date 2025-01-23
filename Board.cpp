@@ -22,15 +22,15 @@ void CBoard::Init(bool isColored, char board[][BORDER_WIDTH - 2])
 
 void CBoard::Draw() const
 {
+	std::cout.flush();
 	if (m_IsColored)
 	{
 		for (int y = 0; y < BORDER_HIGHT - 2; y++)
 		{ 
+			if (y != 0)
+			cout <<endl;  //fit the printing exactly to border hight and width 
 			for (int x = 0; x < BORDER_WIDTH - 2; x++)
-			{
 				DrawOneChar(PrintBoard[y][x]);
-			}
-			cout <<endl; 
 		}
 	}
 	else
@@ -44,8 +44,6 @@ void CBoard::Draw() const
 			cout << endl; 
 		}
 	}
-
-
 }
 
 void CBoard::DrawOneChar(char ch) const
